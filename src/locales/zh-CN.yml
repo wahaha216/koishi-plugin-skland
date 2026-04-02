@@ -1,0 +1,14 @@
+_config:
+  - $desc: 签到配置
+    sklands:
+      $desc: 森空岛配置
+      name: 名称
+      token: 令牌
+      signArknights: 签到明日方舟
+      signArknightsEndfield: 签到明日方舟：终末地
+    cron: 签到时间，5位cron表达式
+  - $desc: 推送设置
+    pushChannelIds: 需要推送签到结果的频道ID列表
+    pushPrivateIds: 需要推送签到结果的用户ID列表
+  - $desc: 开发者选项
+    debug: 调试模式，输出更多信息

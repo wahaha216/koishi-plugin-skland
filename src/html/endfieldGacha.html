@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>塔卫二终端寻访报告</title>
+    <style>
+      :root {
+        --bg-main: #0a0a0c;
+        --bg-card: #141417;
+        --bg-inner: #1c1c1f;
+        --text-main: #f0f0f2;
+        --text-dim: #88888e;
+        --color-gold: #b58d59;
+        --color-purple: #9b59b6;
+        --color-four: #4e8ca1;
+        --color-lucky: #4a9e5f;
+        --color-pity: #a34646;
+        --color-off: #44444a;
+        /* 饼图专用配色 */
+        --color-six: #ce4242; /* 6星：赤红 */
+        --color-five: #d9a352; /* 5星：明金 */
+        --color-four: #8c67ad; /* 4星：高级紫 */
+
+        --img-gift: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAvUlEQVR4nO3WTQrCMBAF4Ky8k3oBixdqxoU7f+4nzrhV2x7jyWgKRWjaSgIF58FAB0K+dLKJc5ae7C9YEOPsBXWoQ6iaBBUxjrrGpY5nnEiAWOlBksOkfyVAecVyx1i12Fdf5YAb3VyR0L9h/faCdeib3za/YesZz6GRTi7GgwRFP/xZkBZt759xj40zC9q9lnnB/xmaOLZkYyaDxWAYDIPJYJk1zONeIVPg6Oujs1ExBh8LK1oKNoOwxWXKCzBQj+uJZ7jpAAAAAElFTkSuQmCC");
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        margin: 0;
+        padding: 30px;
+        width: 1200px;
+      }
+
+      /* --- 顶部玩家面板 --- */
+      .player-header {
+        display: flex;
+        align-items: center;
+        background: var(--bg-card);
+        padding: 20px 30px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #222;
+      }
+      .player-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-size: cover;
+        border: 2px solid var(--color-gold);
+      }
+      .player-info {
+        margin-left: 20px;
+        flex: 1;
+      }
+      .player-name {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .player-uid {
+        color: var(--text-dim);
+        font-size: 13px;
+        margin-top: 4px;
+      }
+
+      /* --- 顶部 5 列垂直布局 --- */
+      .global-stats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        margin-bottom: 30px;
+      }
+      .stat-card {
+        background: var(--bg-card);
+        border-radius: 8px;
+        padding: 15px;
+        border: 1px solid #2a2a2e;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 180px; /* 增加高度以容纳饼图 */
+      }
+      .card-title {
+        font-size: 10px;
+        color: var(--text-dim);
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .card-pulls {
+        font-size: 22px;
+        font-weight: bold;
+        color: var(--text-main);
+      }
+      .card-pulls span {
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-left: 4px;
+      }
+      .card-detail-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        margin-top: 4px;
+      }
+      .detail-counts {
+        color: var(--color-gold);
+        font-weight: bold;
+      }
+
+      /* 进度条样式 */
+      .pity-mini-box {
+        margin-top: 10px;
+      }
+      .pity-bar-bg {
+        height: 4px;
+        background: #222;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .pity-bar-fill {
+        height: 100%;
+        background: var(--color-gold);
+      }
+
+      /* 饼图样式 (卡片底部) */
+      .card-pie-footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #222;
+        margin-top: 10px;
+      }
+      .mini-pie {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        position: relative;
+        flex-shrink: 0;
+        box-shadow: inset 0 0 0 6px var(--bg-card);
+      }
+      .pie-legend {
+        font-size: 9px;
+        color: var(--text-dim);
+        line-height: 1.4;
+      }
+      .pie-legend .pie-data {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .pie-legend .pie-data .precent {
+        width: 40px;
+      }
+      .pie-legend .pie-data .num {
+        width: 50px;
+        justify-content: right;
+      }
+      .dot {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        margin-right: 4px;
+      }
+
+      /* --- 底部列表详情 (完全还原原始样式) --- */
+      .gacha-dashboard {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        align-items: start;
+      }
+      .column-title {
+        font-size: 12px;
+        color: var(--text-dim);
+        font-weight: bold;
+        border-bottom: 1px solid #333;
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+      }
+      .pool-card {
+        background: var(--bg-card);
+        border-radius: 4px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        border: 1px solid #222;
+      }
+      .pool-header {
+        height: 65px;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: flex-end;
+        padding: 10px 15px;
+        position: relative;
+      }
+      .pool-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+      }
+      .header-text-group {
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .pool-name {
+        font-size: 14px;
+        font-weight: bold;
+      }
+      .up-target-label {
+        font-size: 10px;
+        color: var(--color-gold);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 0 5px;
+        border-radius: 2px;
+        width: fit-content;
+        border: 1px solid rgba(181, 141, 89, 0.3);
+      }
+      .pool-total {
+        z-index: 1;
+        font-size: 11px;
+        margin-left: auto;
+        color: #aaa;
+      }
+
+      .char-row {
+        display: flex;
+        align-items: center;
+        height: 38px;
+        padding: 0 12px;
+        margin: 2px 0;
+      }
+      .char-avatar {
+        width: 30px;
+        height: 30px;
+        background-size: cover;
+        border-radius: 2px;
+        margin-right: 8px;
+        background-color: #222;
+      }
+      .track {
+        flex: 1;
+        height: 16px;
+        background: #222;
+        position: relative;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        background: var(--color-gold);
+        transition: width 0.5s;
+      }
+      .char-name {
+        position: absolute;
+        left: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .pulls-info {
+        margin-left: 8px;
+        display: flex;
+        align-items: center;
+        min-width: 80px;
+        justify-content: flex-end;
+        gap: 3px;
+      }
+      .pulls-num {
+        font-size: 13px;
+        font-weight: bold;
+      }
+      .tag {
+        font-size: 9px;
+        padding: 1px 3px;
+        border-radius: 2px;
+        font-weight: bold;
+      }
+      .tag-up {
+        background: var(--color-gold);
+        color: #000;
+      }
+      .tag-lucky {
+        background: var(--color-lucky);
+        color: #fff;
+      }
+      .tag-pity {
+        background: var(--color-pity);
+        color: #fff;
+      }
+      .tag-off {
+        background: var(--color-off);
+        color: #ccc;
+        transform: skewX(-10deg);
+      }
+
+      .lucky .fill {
+        background: var(--color-lucky);
+      }
+      .pity .fill {
+        background: var(--color-pity);
+      }
+      .is-free .fill {
+        background: #4e8ca1;
+      }
+
+      .footer-notes {
+        margin-top: 20px;
+        font-size: 10px;
+        color: var(--text-dim);
+      }
+
+      .footer-signature {
+        width: 100%;
+        text-align: center;
+        padding: 20px 0 10px 0; /* 增加顶部间距，与上方内容拉开距离 */
+        font-size: 10px;
+        color: var(--text-dim);
+        opacity: 0.6;
+        font-family: "monospace", sans-serif;
+        text-transform: uppercase; /* 全大写 */
+        letter-spacing: 1px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05); /* 淡淡的分割线 */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="player-header">
+      <div
+        class="player-avatar"
+        style="background-image: url('{{avatarUrl}}');"
+      ></div>
+      <div class="player-info">
+        <div class="player-name">{{name}}</div>
+        <div class="player-uid">UID: {{uid}}</div>
+      </div>
+    </div>
+
+    <div class="global-stats">
+      {{#with gacha.special}}
+      <div class="stat-card">
+        <div>
+          <div class="card-title">限定寻访</div>
+          <div class="card-pulls">
+            {{total}}<span>抽 </span>{{averageUpPulls}}<span>UP平均</span>
+          </div>
+          <div class="pity-mini-box">
+            <div class="card-detail-row">
+              <span class="detail-counts">保底: {{currentPity}} / 80</span>
+            </div>
+            <div class="pity-bar-bg">
+              <div class="pity-bar-fill" style="width: {{percent}}"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-pie-footer">
+          <div
+            class="mini-pie"
+            style="background: conic-gradient(var(--color-six) 0% {{stats.sixP}}%, var(--color-five) {{stats.sixP}}% {{stats.fivePSum}}%, var(--color-four) {{stats.fivePSum}}% 100%);"
+          ></div>
+          <div class="pie-legend">
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-six)"></div>
+              <div class="precent">{{stats.sixP}}%</div>
+              <div class="num">6★ {{stats.six}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-five)"></div>
+              <div class="precent">{{stats.fiveP}}%</div>
+              <div class="num">5★ {{stats.five}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-four)"></div>
+              <div class="precent">{{stats.fourP}}%</div>
+              <div class="num">4★ {{stats.four}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/with}} {{#with gacha.weapon}}
+      <div class="stat-card">
+        <div>
+          <div class="card-title">武器寻访</div>
+          <div class="card-pulls">
+            {{total}}<span>抽 </span>{{averageUpPulls}}<span>UP平均</span>
+          </div>
+
+          <div class="pity-mini-box">
+            <div class="card-detail-row">
+              <span class="detail-counts">保底: {{currentPity}} / 40</span>
+            </div>
+            <div class="pity-bar-bg">
+              <div class="pity-bar-fill" style="width: {{percent}}"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-pie-footer">
+          <div
+            class="mini-pie"
+            style="background: conic-gradient(var(--color-six) 0% {{stats.sixP}}%, var(--color-five) {{stats.sixP}}% {{stats.fivePSum}}%, var(--color-four) {{stats.fivePSum}}% 100%);"
+          ></div>
+          <div class="pie-legend">
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-six)"></div>
+              <div class="precent">{{stats.sixP}}%</div>
+              <div class="num">6★ {{stats.six}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-five)"></div>
+              <div class="precent">{{stats.fiveP}}%</div>
+              <div class="num">5★ {{stats.five}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-four)"></div>
+              <div class="precent">{{stats.fourP}}%</div>
+              <div class="num">4★ {{stats.four}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/with}} {{#with gacha.standard}}
+      <div class="stat-card">
+        <div>
+          <div class="card-title">基础寻访</div>
+          <div class="card-pulls">{{total}}<span>抽</span></div>
+          <div class="pity-mini-box">
+            <div class="card-detail-row">
+              <span class="detail-counts">保底: {{currentPity}} / 80</span>
+            </div>
+            <div class="pity-bar-bg">
+              <div class="pity-bar-fill" style="width: {{percent}}"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-pie-footer">
+          <div
+            class="mini-pie"
+            style="background: conic-gradient(var(--color-six) 0% {{stats.sixP}}%, var(--color-five) {{stats.sixP}}% {{stats.fivePSum}}%, var(--color-four) {{stats.fivePSum}}% 100%);"
+          ></div>
+          <div class="pie-legend">
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-six)"></div>
+              <div class="precent">{{stats.sixP}}%</div>
+              <div class="num">6★ {{stats.six}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-five)"></div>
+              <div class="precent">{{stats.fiveP}}%</div>
+              <div class="num">5★ {{stats.five}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-four)"></div>
+              <div class="precent">{{stats.fourP}}%</div>
+              <div class="num">4★ {{stats.four}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/with}} {{#with gacha.beginner}}
+      <div class="stat-card">
+        <div>
+          <div class="card-title">启程寻访</div>
+          <div class="card-pulls">{{total}}<span>抽</span></div>
+          {{#if isDone}}
+          <div class="card-detail-row">
+            <span style="color: var(--text-dim)">启程寻访已完成</span>
+          </div>
+          {{/if}}
+        </div>
+        <div class="card-pie-footer">
+          <div
+            class="mini-pie"
+            style="background: conic-gradient(var(--color-six) 0% {{stats.sixP}}%, var(--color-five) {{stats.sixP}}% {{stats.fivePSum}}%, var(--color-four) {{stats.fivePSum}}% 100%);"
+          ></div>
+          <div class="pie-legend">
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-six)"></div>
+              <div class="precent">{{stats.sixP}}%</div>
+              <div class="num">6★ {{stats.six}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-five)"></div>
+              <div class="precent">{{stats.fiveP}}%</div>
+              <div class="num">5★ {{stats.five}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-four)"></div>
+              <div class="precent">{{stats.fourP}}%</div>
+              <div class="num">4★ {{stats.four}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/with}}
+      <div
+        class="stat-card overall-assets"
+        style="border-left: 3px solid var(--color-gold); min-height: 180px"
+      >
+        <div>
+          <div class="card-title">寻访资产总计</div>
+          <div
+            style="
+              margin-top: 15px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+              "
+            >
+              <span style="font-size: 11px; color: var(--text-dim)">
+                嵌晶玉消耗
+              </span>
+              <span style="font-size: 18px; font-weight: 800; color: #f0f0f2">
+                {{crystalJade}}
+              </span>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+              "
+            >
+              <span style="font-size: 11px; color: var(--text-dim)">
+                武器配额获取
+              </span>
+              <span
+                style="
+                  font-size: 18px;
+                  font-weight: 800;
+                  color: var(--color-gold);
+                "
+              >
+                {{weaponQuota}}
+              </span>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+              "
+            >
+              <span style="font-size: 11px; color: var(--text-dim)">
+                武器配额消耗
+              </span>
+              <span
+                style="
+                  font-size: 18px;
+                  font-weight: 800;
+                  color: var(--color-pity);
+                "
+              >
+                {{useWeaponQuota}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gacha-dashboard">
+      <div class="column">
+        <div class="column-title">限定寻访</div>
+        {{#each pools.SPECIAL}}
+        <div class="pool-card">
+          <div
+            class="pool-header"
+            style="background-image: url('{{bannerUrl}}');"
+          >
+            <div class="header-text-group">
+              <b class="pool-name">{{name}}</b>
+              {{#if upName}}
+              <div class="up-target-label">UP：{{upName}}</div>
+              {{/if}}
+            </div>
+            <span class="pool-total">
+              {{total}} 抽 | {{upCount}}UP {{offBannerCount}}歪| 垫
+              {{currentPity}}
+            </span>
+          </div>
+          {{#each six}}
+          <div
+            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}} {{#if isFree}}is-free{{/if}}"
+          >
+            <div
+              class="char-avatar"
+              style="background-image: {{#if avatarUrl}}url('{{avatarUrl}}'){{else}}var(--img-gift){{/if}};"
+            ></div>
+            <div class="track">
+              <div class="fill" style="width: {{percent}}"></div>
+              <span class="char-name">{{name}}</span>
+            </div>
+            <div class="pulls-info">
+              <span class="pulls-num">
+                {{#if isFree}}--{{else}}{{#if
+                lastPity}}{{lastPity}}+{{/if}}{{pulls}}{{/if}}</span
+              >
+              {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}{{#unless
+              isFree}}<span class="tag tag-off">歪</span>{{/unless}}{{/if}}
+              {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
+              isPity}}<span class="tag tag-pity">非</span>{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="column">
+        <div class="column-title">武器寻访</div>
+        {{#each pools.WEAPON}}
+        <div class="pool-card">
+          <div
+            class="pool-header"
+            style="background-image: url('{{bannerUrl}}');"
+          >
+            <div class="header-text-group">
+              <b class="pool-name">{{name}}</b>
+              {{#if upName}}
+              <div class="up-target-label">UP：{{upName}}</div>
+              {{/if}}
+            </div>
+            <span class="pool-total">
+              {{total}} 抽 | {{upCount}}UP {{offBannerCount}}歪| 垫
+              {{currentPity}}
+            </span>
+          </div>
+          {{#each six}}
+          <div
+            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
+          >
+            <div
+              class="char-avatar"
+              style="background-image: url('{{avatarUrl}}');"
+            ></div>
+            <div class="track">
+              <div class="fill" style="width: {{percent}}"></div>
+              <span class="char-name">{{name}}</span>
+            </div>
+            <div class="pulls-info">
+              <span class="pulls-num"> {{pulls}} </span>
+              {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}<span
+                class="tag tag-off"
+              >
+                歪
+              </span>
+              {{/if}} {{#if isLucky}}<span class="tag tag-lucky">欧</span>
+              {{/if}} {{#if isPity}}<span class="tag tag-pity">非</span>{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}}
+      </div>
+
+      <div class="column">
+        <div class="column-title">基础寻访 & 启程寻访</div>
+        {{#each pools.STANDARD}}
+        <div class="pool-card">
+          <div class="pool-header">
+            <b class="pool-name">{{name}}</b>
+            <span class="pool-total">{{total}} 抽</span>
+          </div>
+          {{#each six}}
+          <div
+            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
+          >
+            <div
+              class="char-avatar"
+              style="background-image: url('{{avatarUrl}}');"
+            ></div>
+            <div class="track">
+              <div class="fill" style="width: {{percent}}"></div>
+              <span class="char-name">{{name}}</span>
+            </div>
+            <div class="pulls-info">
+              <span class="pulls-num">{{pulls}}</span>
+              {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
+              isPity}}<span class="tag tag-pity">非</span>{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}} {{#each pools.BEGINNER}}
+        <div class="pool-card" style="border: 1px dashed #444">
+          <div class="pool-header">
+            <b class="pool-name">{{name}}</b
+            ><span class="pool-total">{{total}} 抽</span>
+          </div>
+          {{#each six}}
+          <div
+            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
+          >
+            <div
+              class="char-avatar"
+              style="background-image: url('{{avatarUrl}}');"
+            ></div>
+            <div class="track">
+              <div
+                class="fill"
+                style="width: {{percent}}; background: var(--color-four);"
+              ></div>
+              <span class="char-name">{{name}}</span>
+            </div>
+            <div class="pulls-info">
+              <span class="pulls-num">{{pulls}}</span>
+              {{#if isLucky}}<span class="tag tag-lucky">欧</span> {{/if}} {{#if
+              isPity}}<span class="tag tag-pity">非</span>{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="footer-notes">
+      注：当抽卡数据显示a+b时，a表示垫抽数，b表示当前池子抽数，和为保底计数，计算欧非也使用和做计算
+    </div>
+    <div class="footer-signature">
+      generated by @wahaha216/koishi-plugin-skland
+    </div>
+  </body>
+</html>

@@ -1,0 +1,107 @@
+name: Gacha Data Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      pool_id:
+        description: "卡池 ID (必填)"
+        required: true
+        type: string
+      server_id:
+        description: "服务器 ID"
+        required: false
+        default: "1"
+        type: string
+      lang:
+        description: "语言设置"
+        required: false
+        default: "zh-cn"
+        type: choice
+        options:
+          - "zh-cn"
+          - "en-us"
+          - "ja-jp"
+          - "ko-kr"
+          - "zh-tw"
+          - "es-mx"
+          - "pt-br"
+          - "fr-fr"
+          - "de-de"
+          - "ru-ru"
+          - "it-it"
+          - "id-id"
+          - "th-th"
+          - "vi-vn"
+
+jobs:
+  sync_gacha_map:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 获取并处理数据
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // 1. 获取输入参数
+            const pool_id = "${{ github.event.inputs.pool_id }}";
+            const server_id = "${{ github.event.inputs.server_id }}";
+            const lang = "${{ github.event.inputs.lang }}";
+
+            const url = `https://ef-webview.hypergryph.com/api/content?lang=${lang}&pool_id=${pool_id}&server_id=${server_id}`;
+            const filePath = path.join(process.env.GITHUB_WORKSPACE, 'src/data/gacha_map.json');
+
+            try {
+              // 2. 发起请求
+              const response = await fetch(url);
+              const result = await response.json();
+
+              // 3. 校验 code === 0
+              if (result.code === 0 && result.data && result.data.pool) {
+                console.log(`成功获取卡池数据: ${pool_id}`);
+                
+                // 4. 读取现有文件
+                let gachaMap = {};
+                if (fs.existsSync(filePath)) {
+                  const fileContent = fs.readFileSync(filePath, 'utf-8');
+                  gachaMap = JSON.parse(fileContent || '{}');
+                } else {
+                  // 如果目录不存在则创建
+                  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+                }
+
+                // 5. 更新 Record<string, data.pool>
+                // 仅保存返回内容中的 data.pool 部分
+                gachaMap[pool_id] = result.data.pool;
+
+                // 6. 写回文件 (格式化保存以便阅读)
+                fs.writeFileSync(filePath, JSON.stringify(gachaMap, null, 2), 'utf-8');
+                console.log('文件已成功更新');
+              } else {
+                console.error('API 返回错误或数据为空:', result);
+                process.exit(1);
+              }
+            } catch (error) {
+              console.error('执行出错:', error);
+              process.exit(1);
+            }
+
+      - name: 自动提交
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/data/gacha_map.json
+
+          if git diff --staged --quiet; then
+            echo "没有检测到内容变化。"
+          else
+            git commit -m "data: update gacha_map.json for ${{ github.event.inputs.pool_id }}"
+            git push
+          fi
