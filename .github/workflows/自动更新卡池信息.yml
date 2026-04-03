@@ -1,0 +1,99 @@
+name: Gacha Smart Discovery Sync
+
+on:
+  schedule:
+    - cron: '1 4 * * *' # 北京时间 12:01 自动运行
+  workflow_dispatch:   # 保留手动触发按钮
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  BASE_DATE: '2026-03-12T12:00:00+08:00'
+  CYCLE_DAYS: 17
+
+jobs:
+  discovery_sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 执行探测抓取
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const baseDate = new Date(process.env.BASE_DATE);
+            const today = new Date();
+            const cycleDays = parseInt(process.env.CYCLE_DAYS);
+            
+            // 1. 基于 17天/2池 规律计算理论基点
+            const diffDays = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24));
+            const totalCycles = Math.floor(diffDays / cycleDays);
+            const theoryB = Math.floor(totalCycles / 2) + 1;
+            const theoryC = (totalCycles % 2) + 1;
+
+            const filePath = path.join(process.env.GITHUB_WORKSPACE, 'src/data/gacha_map.json');
+            let gachaMap = {};
+            if (fs.existsSync(filePath)) {
+              try {
+                gachaMap = JSON.parse(fs.readFileSync(filePath, 'utf-8') || '{}');
+              } catch (e) { gachaMap = {}; }
+            }
+
+            // 核心请求函数
+            async function fetchPool(type, b, c) {
+              const poolId = `${type}_1_${b}_${c}`;
+              const url = `https://ef-webview.hypergryph.com/api/content?lang=zh-cn&pool_id=${poolId}&server_id=1`;
+              try {
+                const res = await fetch(url);
+                const json = await res.json();
+                if (json.code === 0 && json.data?.pool) {
+                  gachaMap[poolId] = json.data.pool;
+                  console.log(`🎯 [FOUND] ${poolId} (${json.data.pool.pool_name})`);
+                  return true;
+                }
+              } catch (e) {}
+              console.log(`✕ [SKIP] ${poolId}`);
+              return false;
+            }
+
+            async function smartDiscover(type) {
+              console.log(`\n>>> Scanning ${type}...`);
+              // 构造探测队列: 当前C, C+1, C+2 以及 下个版本的1, 2
+              const plan = [
+                { b: theoryB, c: theoryC },
+                { b: theoryB, c: theoryC + 1 },
+                { b: theoryB, c: theoryC + 2 },
+                { b: theoryB + 1, c: 1 },
+                { b: theoryB + 1, c: 2 }
+              ];
+              // 去重处理
+              const uniquePlan = Array.from(new Set(plan.map(p => `${p.b}_${p.c}`)))
+                                     .map(s => ({ b: parseInt(s.split('_')[0]), c: parseInt(s.split('_')[1]) }));
+
+              for (const p of uniquePlan) {
+                await fetchPool(type, p.b, p.c);
+              }
+            }
+
+            // 执行角色池和武器池探测
+            await smartDiscover('special');
+            await smartDiscover('weponbox');
+
+            // 写入文件
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(filePath, JSON.stringify(gachaMap, null, 2), 'utf-8');
+
+      - name: 提交更新到仓库
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/data/gacha_map.json
+          # 如果没有变化就静默退出，有变化就提交 push
+          git diff --staged --quiet || (git commit -m "auto: update gacha data $(date +'%Y-%m-%d')" && git push)
