@@ -20,7 +20,8 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 执行探测抓取
+      - name: 动态偏移探测
+        id: detector # 给这一步加个 ID 方便后续引用输出
         uses: actions/github-script@v7
         with:
           script: |
@@ -31,40 +32,39 @@ jobs:
             const today = new Date();
             const cycleDays = parseInt(process.env.CYCLE_DAYS);
             
-            // 1. 基于 17天/2池 规律计算理论基点
             const diffDays = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24));
             const totalCycles = Math.floor(diffDays / cycleDays);
             const theoryB = Math.floor(totalCycles / 2) + 1;
             const theoryC = (totalCycles % 2) + 1;
 
             const filePath = path.join(process.env.GITHUB_WORKSPACE, 'src/data/gacha_map.json');
-            let gachaMap = {};
-            if (fs.existsSync(filePath)) {
-              try {
-                gachaMap = JSON.parse(fs.readFileSync(filePath, 'utf-8') || '{}');
-              } catch (e) { gachaMap = {}; }
-            }
+            let gachaMap = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : {};
+            
+            // --- 新增：用于记录本次新抓到的 ID ---
+            let newFetchedIds = [];
 
-            // 核心请求函数
             async function fetchPool(type, b, c) {
               const poolId = `${type}_1_${b}_${c}`;
+              // 如果 ID 已经存在且包含数据，我们可以选择跳过或者更新
+              // 这里为了记录“新变动”，我们对比一下
               const url = `https://ef-webview.hypergryph.com/api/content?lang=zh-cn&pool_id=${poolId}&server_id=1`;
               try {
                 const res = await fetch(url);
                 const json = await res.json();
                 if (json.code === 0 && json.data?.pool) {
+                  // 只有当这个 ID 之前不在 map 里，或者数据发生了变化时，才记录
+                  if (!gachaMap[poolId]) {
+                    newFetchedIds.push(poolId);
+                  }
                   gachaMap[poolId] = json.data.pool;
-                  console.log(`🎯 [FOUND] ${poolId} (${json.data.pool.pool_name})`);
+                  console.log(`🎯 [FOUND] ${poolId}`);
                   return true;
                 }
               } catch (e) {}
-              console.log(`✕ [SKIP] ${poolId}`);
               return false;
             }
 
             async function smartDiscover(type) {
-              console.log(`\n>>> Scanning ${type}...`);
-              // 构造探测队列: 当前C, C+1, C+2 以及 下个版本的1, 2
               const plan = [
                 { b: theoryB, c: theoryC },
                 { b: theoryB, c: theoryC + 1 },
@@ -72,28 +72,40 @@ jobs:
                 { b: theoryB + 1, c: 1 },
                 { b: theoryB + 1, c: 2 }
               ];
-              // 去重处理
               const uniquePlan = Array.from(new Set(plan.map(p => `${p.b}_${p.c}`)))
                                      .map(s => ({ b: parseInt(s.split('_')[0]), c: parseInt(s.split('_')[1]) }));
-
               for (const p of uniquePlan) {
                 await fetchPool(type, p.b, p.c);
               }
             }
 
-            // 执行角色池和武器池探测
             await smartDiscover('special');
             await smartDiscover('weponbox');
 
-            // 写入文件
-            const dir = path.dirname(filePath);
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-            fs.writeFileSync(filePath, JSON.stringify(gachaMap, null, 2), 'utf-8');
+            fs.writeFileSync(filePath, JSON.stringify(gachaMap, null, 2));
+            
+            // --- 输出 ID 给后续步骤 ---
+            core.setOutput('ids', newFetchedIds.join(', '));
 
       - name: 提交更新到仓库
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add src/data/gacha_map.json
-          # 如果没有变化就静默退出，有变化就提交 push
-          git diff --staged --quiet || (git commit -m "auto: update gacha data $(date +'%Y-%m-%d')" && git push)
+          
+          # 获取上一步输出的 ID 列表
+          FETCHED_IDS="${{ steps.detector.outputs.ids }}"
+          
+          if git diff --staged --quiet; then
+            echo "没有新内容需要提交"
+          else
+            # 如果有新 ID，就把 ID 写进 commit message，否则用通用说明
+            if [ -z "$FETCHED_IDS" ]; then
+              COMMIT_MSG="auto: 定时同步卡池数据 (无新ID)"
+            else
+              COMMIT_MSG="auto: 添加新卡池数据 [ $FETCHED_IDS ]"
+            fi
+            
+            git commit -m "$COMMIT_MSG"
+            git push
+          fi
