@@ -13,7 +13,7 @@ export enum ENDFIELD_POOL_TYPE {
 
 export const ENDFIELD_POOL = "https://ef-webview.hypergryph.com/api/content";
 export const ENDFIELD_POOL_GITHUB =
-  "https://raw.githubusercontent.com/FrostN0v0/EndfieldGachaPoolTable/refs/heads/master/GachaPoolTable.json";
+  "https://raw.githubusercontent.com/wahaha216/koishi-plugin-skland/refs/heads/master/src/data/gacha_map.json";
 
 export const SKLAND_API = {
   QRCODE: {
