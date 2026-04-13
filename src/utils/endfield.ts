@@ -189,6 +189,7 @@ export const buildEndfieldCardJson = (
     avatar: data.detail.base.avatarUrl,
     worldLevel: data.detail.base.worldLevel,
     protocolLevel: data.detail.base.level,
+    mainMission: data.detail.base.mainMission,
     collection: {
       character: data.detail.base.charNum,
       weapon: data.detail.base.weaponNum,
@@ -219,7 +220,7 @@ export const buildEndfieldCardJson = (
       current: data.detail.weeklyMission.score,
       max: data.detail.weeklyMission.total,
     },
-    achieveMedals,
+    achieve: { count: data.detail.achieve.count, medals: achieveMedals },
     characters,
   };
 };

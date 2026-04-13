@@ -120,6 +120,14 @@
         font-weight: bold;
         font-family: monospace;
       }
+      .mission-val.main-mission {
+        color: var(--color-gold);
+        max-width: 130px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: bold;
+      }
 
       /* --- 中间布局 --- */
       .middle-layout {
@@ -577,7 +585,7 @@
                 <div style="margin-bottom: 5px">
                   <span class="world-lv-badge"> 探索等级 {{worldLevel}} </span>
                   <span style="color: var(--color-gold); font-size: 12px">
-                    LV.{{protocolLevel}}
+                    协议等级 LV.{{protocolLevel}}
                   </span>
                 </div>
                 UID：{{uid}} <br />
@@ -599,14 +607,25 @@
         >
           <div style="border-right: 1px solid #222; padding-right: 10px">
             <div class="mission-row">
-              <span class="mission-label">每日活跃度</span>
+              <span class="mission-label" style="color: var(--color-blue)">
+                主线任务
+              </span>
+              <span
+                class="mission-val main-mission"
+                title="{{mainMission.description}}"
+              >
+                {{mainMission.description}}
+              </span>
+            </div>
+            <div class="mission-row">
+              <span class="mission-label"> 每日活跃度 </span>
               <span class="mission-val"> {{daily.current}}/{{daily.max}} </span>
             </div>
             <div class="mission-row">
-              <span class="mission-label">每周活跃度</span
-              ><span class="mission-val"
-                >{{weekly.current}}/{{weekly.max}}</span
-              >
+              <span class="mission-label"> 每周活跃度 </span>
+              <span class="mission-val">
+                {{weekly.current}}/{{weekly.max}}
+              </span>
             </div>
             <div class="mission-row">
               <span class="mission-label">通行证等级</span>
@@ -756,7 +775,7 @@
                 margin-top: 10px;
               "
             >
-              {{#each achieveMedals}}
+              {{#each achieve.medals}}
               <div class="medal-row">
                 {{#each this}}
                 <div class="hexagon-box">

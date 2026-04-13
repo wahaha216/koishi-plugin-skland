@@ -260,6 +260,8 @@ export interface EndfieldInfoCard {
   worldLevel: number;
   // 协议等级
   protocolLevel: number;
+  // 主线任务
+  mainMission: { id: string; description: string };
   // 收集
   collection: {
     // 角色
@@ -299,6 +301,6 @@ export interface EndfieldInfoCard {
   daily: { current: number; max: number };
   // 周常
   weekly: { current: number; max: number };
-  achieveMedals: EndfieldCardAchieveMedals[][];
+  achieve: { count: number; medals: EndfieldCardAchieveMedals[][] };
   characters: EndfieldCardCharacters[];
 }
