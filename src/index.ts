@@ -32,33 +32,13 @@ import {} from "koishi-plugin-puppeteer";
 export const name = "skland";
 
 export interface Config {
-  sklands: {
-    name: string;
-    token: string;
-    signArknights: boolean;
-    signArknightsEndfield: boolean;
-  }[];
   cron: string;
-  pushChannelIds: string[];
-  pushPrivateIds: string[];
   debug: boolean;
 }
 
 export const Config: Schema<Config> = Schema.intersect([
   Schema.object({
-    sklands: Schema.array(
-      Schema.object({
-        name: Schema.string(),
-        token: Schema.string().required(),
-        signArknights: Schema.boolean().default(true),
-        signArknightsEndfield: Schema.boolean().default(true),
-      }),
-    ).role("table"),
     cron: Schema.string().default("30 0 * * *"),
-  }),
-  Schema.object({
-    pushChannelIds: Schema.array(String),
-    pushPrivateIds: Schema.array(String),
   }),
   Schema.object({
     debug: Schema.boolean().default(false),

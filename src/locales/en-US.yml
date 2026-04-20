@@ -1,11 +1,5 @@
 _config:
   - $desc: Sign Configuration
-    sklands:
-      $desc: Skland Configuration
-      name: Name
-      token: Token
-      signArknights: Sign Arknights
-      signArknightsEndfield: Sign Arknights Endfield
     cron: Sign time, 5-digit cron expression
   - $desc: Developer Options
     debug: Debug mode, output more information
