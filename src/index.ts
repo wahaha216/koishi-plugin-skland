@@ -14,6 +14,7 @@ import {
   EndfieldWeaponPool,
   SklandRoleSchedule,
   AppName,
+  GachaPoolGithub,
 } from "./types";
 import hbs from "handlebars";
 import qrcode from "qrcode";
@@ -25,9 +26,11 @@ import {
   getPoolInfo,
   processEndfieldPool,
   ENDFIELD_POOL_TYPE,
+  poolsToMap,
 } from "./utils";
 import {} from "koishi-plugin-cron";
 import {} from "koishi-plugin-puppeteer";
+import localGachaMap from "./data/gacha_map.json";
 
 export const name = "skland";
 
@@ -198,10 +201,6 @@ export async function apply(ctx: Context, config: Config) {
     return !!role.length;
   };
 
-  // ctx.command("skland.sign", "手动触发森空岛签到").action(async () => {
-  //   executeSign();
-  // });
-
   // ctx.command("skland-user").action(async ({ session, options }) => {
   //   const skland = new Skland(config, ctx.http, logger);
   //   const playerInfo = await skland.getCardDetail();
@@ -218,10 +217,24 @@ export async function apply(ctx: Context, config: Config) {
    * 同步所有卡池信息
    * @returns 同步结果
    */
-  const syncAllPools = async () => {
+  const syncAllPools = async (isStart?: boolean) => {
     const skland = new Skland(config, ctx.http, logger);
-    const { charPools, weaponPools } =
-      await skland.getEndfieldGachaPoolInfoFromGithub();
+
+    const getPools = async () => {
+      try {
+        return await skland.getEndfieldGachaPoolInfoFromGithub();
+      } catch (error) {
+        if (isStart) {
+          logger.info(
+            "从Github获取卡池信息失败，将使用本地数据，可能缺失部分卡池信息",
+          );
+          return poolsToMap(localGachaMap as GachaPoolGithub);
+        } else {
+          throw error;
+        }
+      }
+    };
+    const { charPools, weaponPools } = await getPools();
 
     const c = await ctx.database.upsert("skland_endfield_char_pool", charPools);
     const w = await ctx.database.upsert(
@@ -236,15 +249,19 @@ export async function apply(ctx: Context, config: Config) {
     return result;
   };
 
-  try {
-    logger.info("执行启动时获取所有卡池信息");
-    const res = await syncAllPools();
-    logger.info(
-      `获取卡池信息成功，新增${res.inserted}条，修改${res.modified}条`,
-    );
-  } catch (_) {
-    logger.warn("获取卡池信息失败，可能会影响卡池分析渲染！");
-  }
+  const startSyncAllPools = async () => {
+    try {
+      logger.info("执行启动时获取所有卡池信息");
+      const res = await syncAllPools(true);
+      logger.info(
+        `获取卡池信息成功，新增${res.inserted}条，修改${res.modified}条`,
+      );
+    } catch (_) {
+      logger.warn("获取卡池信息失败，可能会影响卡池分析渲染！");
+    }
+  };
+
+  startSyncAllPools();
 
   ctx
     .command("skland.endfield.gacha [at:user]")
@@ -549,12 +566,13 @@ export async function apply(ctx: Context, config: Config) {
     });
 
   ctx
-    .command("skland.endfield.card")
+    .command("skland.endfield.card  [at:user]")
     .alias("终末地卡片")
-    .action(async ({ session, options }) => {
+    .action(async ({ session, options }, user) => {
       const messageId = session.messageId;
       try {
-        const userId = `${session.event.platform}:${session.event.user.id}`;
+        const userId =
+          user || `${session.event.platform}:${session.event.user.id}`;
         const hasRole = await checkRole(userId, "明日方舟：终末地");
         if (!hasRole)
           throw new Error("未绑定明日方舟：终末地角色，无法获取卡片信息！");

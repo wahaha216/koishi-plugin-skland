@@ -46,7 +46,7 @@ export interface EndfieldCharPool {
   ticket_name: string;
   ticket_ten_name: string;
   all: { id: string; name: string; rarity: 4 | 5 | 6 }[];
-  rotate_list: { name: string; times: 1 | 2 | 3; image: string }[];
+  rotate_list: { name: string; times: 1 | 2 | 3; image?: string }[];
 }
 
 export interface EndfieldWeaponPool {

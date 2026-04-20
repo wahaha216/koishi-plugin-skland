@@ -1,5 +1,10 @@
 import { readFile } from "fs/promises";
 import { resolve } from "path";
+import {
+  GachaPoolGithub,
+  SklandCharacterPoolSchedule,
+  SklandWeaponPoolSchedule,
+} from "../types";
 
 export { SKLAND_API, ENDFIELD_POOL_TYPE } from "./const";
 
@@ -40,3 +45,20 @@ export function calPercent(value: number, pityValue: number = 80) {
 }
 
 export { formatTs } from "./day";
+
+export const poolsToMap = (pools: GachaPoolGithub) => {
+  return Object.entries(pools).reduce<{
+    charPools: SklandCharacterPoolSchedule[];
+    weaponPools: SklandWeaponPoolSchedule[];
+  }>(
+    (acc, [pool_id, info]) => {
+      if (info["pool_gacha_type"] === "char") {
+        acc.charPools.push({ pool_id, ...info });
+      } else {
+        acc.weaponPools.push({ pool_id, ...info });
+      }
+      return acc;
+    },
+    { charPools: [], weaponPools: [] },
+  );
+};

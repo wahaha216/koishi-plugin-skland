@@ -36,7 +36,7 @@ import {
   ENDFIELD_POOL,
   ENDFIELD_POOL_GITHUB,
 } from "../utils/const";
-import { delay, jsonToStringWithSpace } from "../utils";
+import { delay, jsonToStringWithSpace, poolsToMap } from "../utils";
 
 export class Skland {
   private config: Config;
@@ -373,32 +373,31 @@ export class Skland {
   /**
    * 获取明日方舟数据
    */
-  public async getPlayerInfo() {
-    for (const account of this.config.sklands) {
-      const { cred, signToken, bindData } = await this.getBindDataContext(
-        account.token,
-      );
-      let uid: string;
-      for (const app of bindData.data.list) {
-        if (app.appCode === "arknights") {
-          uid = app.bindingList[0].uid;
-          break;
-        }
+  public async getPlayerInfo(token: string) {
+    // for (const account of this.config.sklands) {
+    const { cred, signToken, bindData } = await this.getBindDataContext(token);
+    let uid: string;
+    for (const app of bindData.data.list) {
+      if (app.appCode === "arknights") {
+        uid = app.bindingList[0].uid;
+        break;
       }
-      const params = new URLSearchParams({ uid }).toString();
-      this.logger.info(`请求玩家信息，参数：${params}`);
-      const pathname = new URL(SKLAND_API.ARKNIGHTS.PLAYER_INFO).pathname;
-      const { md5Sign: sign, signHeader: sh } = this.generateSign(
-        signToken,
-        pathname,
-        params,
-      );
-      const headers = this.buildHeaders(cred, sign, sh);
-      const playerInfo = await this.http.get<PlayerInfo>(
-        `${SKLAND_API.ARKNIGHTS.PLAYER_INFO}?${params}`,
-        { headers },
-      );
     }
+    const params = new URLSearchParams({ uid }).toString();
+    this.logger.info(`请求玩家信息，参数：${params}`);
+    const pathname = new URL(SKLAND_API.ARKNIGHTS.PLAYER_INFO).pathname;
+    const { md5Sign: sign, signHeader: sh } = this.generateSign(
+      signToken,
+      pathname,
+      params,
+    );
+    const headers = this.buildHeaders(cred, sign, sh);
+    const playerInfo = await this.http.get<PlayerInfo>(
+      `${SKLAND_API.ARKNIGHTS.PLAYER_INFO}?${params}`,
+      { headers },
+    );
+    return playerInfo.data;
+    // }
   }
 
   /**
@@ -473,21 +472,7 @@ export class Skland {
     const res = await this.http.get<GachaPoolGithub>(ENDFIELD_POOL_GITHUB, {
       responseType: "json",
     });
-    const char_weapon_map = Object.entries(res).reduce<{
-      charPools: SklandCharacterPoolSchedule[];
-      weaponPools: SklandWeaponPoolSchedule[];
-    }>(
-      (acc, [pool_id, info]) => {
-        if (info["pool_gacha_type"] === "char") {
-          acc.charPools.push({ pool_id, ...info });
-        } else {
-          acc.weaponPools.push({ pool_id, ...info });
-        }
-        return acc;
-      },
-      { charPools: [], weaponPools: [] },
-    );
-    return char_weapon_map;
+    return poolsToMap(res);
   }
 
   /**

@@ -16,9 +16,12 @@
     "types": [
       "node",
       "yml-register/types"
-    ]
+    ],
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
   "include": [
-    "src"
+    "src",
+    "src/data/gacha_map.json"
   ]
 }
