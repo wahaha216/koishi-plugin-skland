@@ -136,6 +136,13 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.1.2</summary>
+
+尝试将复制进编译目录
+
+</details>
+
+<details>
 <summary>0.1.1</summary>
 
 1. 移除遗留的方法

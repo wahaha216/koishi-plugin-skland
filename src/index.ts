@@ -30,7 +30,7 @@ import {
 } from "./utils";
 import {} from "koishi-plugin-cron";
 import {} from "koishi-plugin-puppeteer";
-import localGachaMap from "./data/gacha_map.json";
+import { readFile } from "fs/promises";
 
 export const name = "skland";
 
@@ -228,7 +228,10 @@ export async function apply(ctx: Context, config: Config) {
           logger.info(
             "从Github获取卡池信息失败，将使用本地数据，可能缺失部分卡池信息",
           );
-          return poolsToMap(localGachaMap as GachaPoolGithub);
+          const localPath = resolve(__dirname, "data", "gacha_map.json");
+          const localGachaData = await readFile(localPath, "utf-8");
+          const localGachaJson = JSON.parse(localGachaData) as GachaPoolGithub;
+          return poolsToMap(localGachaJson);
         } else {
           throw error;
         }
@@ -551,7 +554,7 @@ export async function apply(ctx: Context, config: Config) {
 
         // 读取html模板并渲染
         const templateHtml = readFileSync(
-          resolve(__dirname, "html/endfieldGacha.html"),
+          resolve(__dirname, "html", "endfieldGacha.html"),
           "utf-8",
         );
         const template = hbs.compile(templateHtml);
@@ -580,7 +583,7 @@ export async function apply(ctx: Context, config: Config) {
         const card = buildEndfieldCardJson(data);
 
         const templateHtml = readFileSync(
-          resolve(__dirname, "html/endfieldCard.html"),
+          resolve(__dirname, "html", "endfieldCard.html"),
           "utf-8",
         );
         const template = hbs.compile(templateHtml);

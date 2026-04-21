@@ -1,7 +1,7 @@
 {
   "name": "@wahaha216/koishi-plugin-skland",
   "description": "通过森空岛查询游戏数据",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.6",
+    "copyfiles": "^2.4.1",
     "koishi-plugin-cron": "^3.0.0",
     "koishi-plugin-puppeteer": "^3.0.0"
   },
