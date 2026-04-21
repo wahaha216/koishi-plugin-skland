@@ -109,7 +109,7 @@ TODO
 
 <summary>终末地角色卡片</summary>
 
-![终末地角色卡片](./img/endfield_card.png)
+![终末地角色卡片](https://github.com/wahaha216/koishi-plugin-skland/raw/master/img/endfield_card.png)
 
 </details>
 
@@ -118,7 +118,7 @@ TODO
 <details>
 <summary>终末地抽卡记录</summary>
 
-![终末地抽卡记录](./img/endfield_gacha.png)
+![终末地抽卡记录](https://github.com/wahaha216/koishi-plugin-skland/blob/master/img/endfield_gacha.png)
 
 </details>
 
