@@ -249,7 +249,7 @@ export async function apply(ctx: Context, config: Config) {
     return result;
   };
 
-  const startSyncAllPools = async () => {
+  (async () => {
     try {
       logger.info("执行启动时获取所有卡池信息");
       const res = await syncAllPools(true);
@@ -259,9 +259,7 @@ export async function apply(ctx: Context, config: Config) {
     } catch (_) {
       logger.warn("获取卡池信息失败，可能会影响卡池分析渲染！");
     }
-  };
-
-  startSyncAllPools();
+  })();
 
   ctx
     .command("skland.endfield.gacha [at:user]")
