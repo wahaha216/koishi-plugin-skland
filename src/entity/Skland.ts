@@ -555,32 +555,4 @@ export class Skland {
     }
     return gachaObj;
   }
-
-  public async getEndfieldCard() {
-    // for (const account of this.config.sklands) {
-    //   const { bindData } = await this.getBindDataContext(account.token);
-    //   const cardInfo: EndfieldCard = {
-    //     uid: "",
-    //     name: "",
-    //     avatarUrl: "",
-    //     gacha: {
-    //       total: { character: 0, weapon: 0 },
-    //       standard: { total: 0, averageUpPulls: 0, sixStarCount: 0 },
-    //       special: { total: 0, averageUpPulls: 0, sixStarCount: 0 },
-    //       beginner: { total: 0, averageUpPulls: 0, sixStarCount: 0 },
-    //       weapon: { total: 0, averageUpPulls: 0, sixStarCount: 0 },
-    //     },
-    //     pools: {
-    //       STANDARD: [],
-    //       SPECIAL: [],
-    //       BEGINNER: [],
-    //       WEAPON: [],
-    //     },
-    //   };
-    //   for (const [name, type] of Object.entries(ENDFIELD_POOL_TYPE)) {
-    //     const gachaList = await this.getEndfieldGachaHistory(bindData, type);
-    //     cardInfo.pools[name] = gachaList;
-    //   }
-    // }
-  }
 }
