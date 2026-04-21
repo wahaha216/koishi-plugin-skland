@@ -136,6 +136,15 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.1.3</summary>
+
+1. 添加更多debug控制
+2. 添加千分位
+3. 修复据点发展值百分比计算
+
+</details>
+
+<details>
 <summary>0.1.2</summary>
 
 尝试将复制进编译目录
@@ -146,9 +155,7 @@ TODO
 <summary>0.1.1</summary>
 
 1. 移除遗留的方法
-
 2. 更改为立即执行方法
-
 3. 适配未解锁据点
 
 </details>
