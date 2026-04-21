@@ -62,3 +62,10 @@ export const poolsToMap = (pools: GachaPoolGithub) => {
     { charPools: [], weaponPools: [] },
   );
 };
+
+export function toThousandsls(value: number | string): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '0';
+  
+  return new Intl.NumberFormat('en-US').format(num);
+}

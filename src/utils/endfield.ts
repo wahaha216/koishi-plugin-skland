@@ -14,7 +14,7 @@ import {
   SklandCharacterGachaSchedule,
   SklandWeaponGachaSchedule,
 } from "../types";
-import { calPercent, formatTs } from "./";
+import { calPercent, formatTs, toThousandsls } from "./";
 
 const getRarity = (key: string) =>
   Number(key?.split("_").pop() || 0) as EndfieldCardRarity;
@@ -69,19 +69,17 @@ export const buildEndfieldCardJson = (
       (s) => ({
         officerAvatar: s.officerCharAvatar,
         name: s.name,
-        remainMoney: s.remainMoney,
-        moneyMax: s.moneyMax,
+        remainMoney: toThousandsls(s.remainMoney),
+        moneyMax: toThousandsls(s.moneyMax),
         percent: calPercent(Number(s.remainMoney), Number(s.moneyMax)),
         level: s.level,
-        exp: s.exp,
-        expToLevelUp: s.expToLevelUp,
+        exp: toThousandsls(s.exp),
+        expToLevelUp: toThousandsls(s.expToLevelUp),
         expPercent:
           s.expToLevelUp === "0"
             ? "100%"
-            : calPercent(
-                Number(s.exp) / (Number(s.exp) + Number(s.expToLevelUp)),
-              ),
-        maxExp: (Number(s.exp) + Number(s.expToLevelUp)).toString(),
+            : calPercent(Number(s.exp), Number(s.exp) + Number(s.expToLevelUp)),
+        maxExp: toThousandsls(Number(s.exp) + Number(s.expToLevelUp)),
       }),
     );
     const collections: EndfieldCardDomainCollections[] = d.levels.map((l) => ({
@@ -101,7 +99,10 @@ export const buildEndfieldCardJson = (
       level: d.level,
       settlements,
       collections,
-      money: { current: d.moneyMgr.count, max: d.moneyMgr.total },
+      money: {
+        current: toThousandsls(d.moneyMgr.count),
+        max: toThousandsls(d.moneyMgr.total),
+      },
     });
   });
 

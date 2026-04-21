@@ -181,7 +181,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 9px;
+        font-size: 8px;
       }
 
       .settlement-money {
@@ -703,7 +703,7 @@
             <div class="settlement-section">
               {{#each settlements}}
               <div class="set-card">
-                <img class="set-avatar" src="{{officerAvatar}}" />
+                <img class="set-avatar" src="{{officerAvatar}}" onerror="this.style.opacity='0'" />
                 <div style="flex: 1; min-width: 0">
                   <div
                     style="
@@ -727,27 +727,28 @@
                       </span>
                     </span>
                   </div>
-                  <div style="font-family: monospace" class="settlement-money">
+                  <div class="settlement-money">
                     <div class="label">调度券储量：</div>
                     <div class="amount">
-                      {{#if (eq level 0)}} -- {{else if (eq remainMoney moneyMax)}} 已满 {{else}}
-                      {{remainMoney}}/{{moneyMax}} {{/if}}
+                      {{#if (eq level 0)}} -- {{else if (eq remainMoney
+                      moneyMax)}} 已满 {{else}} {{remainMoney}}/{{moneyMax}}
+                      {{/if}}
                     </div>
                   </div>
                   <div class="bar-bg">
                     <div class="bar-fill" style="width:{{percent}}"></div>
                   </div>
-                  <div style="font-family: monospace" class="settlement-exp">
+                  <div class="settlement-exp">
                     <div class="label">据点发展值：</div>
                     <div class="amount">
-                      {{#if (eq level 0)}} -- {{else if (eq expToLevelUp "0")}} 最大
-                      {{else}}{{remainMoney}}/{{moneyMax}}{{/if}}
+                      {{#if (eq level 0)}} -- {{else if (eq expToLevelUp "0")}}
+                      最大 {{else}} {{exp}}/{{maxExp}} {{/if}}
                     </div>
                   </div>
                   <div class="bar-bg">
                     <div
                       class="bar-fill exp"
-                      style="width:{{#if (eq level 4)}}100{{else}}{{expPercent}}{{/if}}%"
+                      style="width:{{expPercent}}"
                     ></div>
                   </div>
                 </div>
