@@ -384,7 +384,7 @@ export class Skland {
       }
     }
     const params = new URLSearchParams({ uid }).toString();
-    this.logger.info(`请求玩家信息，参数：${params}`);
+    if (this.config.debug) this.logger.info(`请求玩家信息，参数：${params}`);
     const pathname = new URL(SKLAND_API.ARKNIGHTS.PLAYER_INFO).pathname;
     const { md5Sign: sign, signHeader: sh } = this.generateSign(
       signToken,
