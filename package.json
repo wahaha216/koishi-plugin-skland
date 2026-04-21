@@ -20,6 +20,10 @@
   "author": {
     "name": "wahaha216"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wahaha216/koishi-plugin-skland"
+  },
   "peerDependencies": {
     "koishi": "^4.18.0"
   },
