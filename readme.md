@@ -136,6 +136,15 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.1.1</summary>
+
+1. 移除遗留的方法
+
+2. 更改为立即执行方法
+
+</details>
+
+<details>
 <summary>0.1.0</summary>
 
 初版，仅实现终末地的抽卡数据和角色卡片渲染
