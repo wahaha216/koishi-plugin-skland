@@ -730,7 +730,7 @@
                   <div style="font-family: monospace" class="settlement-money">
                     <div class="label">调度券储量：</div>
                     <div class="amount">
-                      {{#if (eq remainMoney moneyMax)}} 已满 {{else}}
+                      {{#if (eq level 0)}} -- {{else if (eq remainMoney moneyMax)}} 已满 {{else}}
                       {{remainMoney}}/{{moneyMax}} {{/if}}
                     </div>
                   </div>
@@ -740,7 +740,7 @@
                   <div style="font-family: monospace" class="settlement-exp">
                     <div class="label">据点发展值：</div>
                     <div class="amount">
-                      {{#if (eq expToLevelUp "0")}} 最大
+                      {{#if (eq level 0)}} -- {{else if (eq expToLevelUp "0")}} 最大
                       {{else}}{{remainMoney}}/{{moneyMax}}{{/if}}
                     </div>
                   </div>
