@@ -782,7 +782,27 @@ export async function apply(ctx: Context, config: Config) {
     });
 
   /**
-   * 解绑
+   * 森空岛手动签到
+   */
+  ctx
+    .command("skland.sign")
+    .alias("森空岛签到")
+    .action(async ({ session, options }) => {
+      const messageId = session.messageId;
+      try {
+        const userId = `${session.event.platform}:${session.event.user.id}`;
+        const userBind = await checkUserBind(userId);
+        const skland = new Skland(config, ctx.http, logger);
+        let text = `========== ${userBind.id} 签到结果 ==========`;
+        text += await skland.sign(userBind.token);
+        logger.info(text);
+      } catch (err) {
+        return [h.quote(messageId), h.text(`签到失败：${err.message}`)];
+      }
+    });
+
+  /**
+   * 森空岛自动签到
    */
   ctx
     .command("skland.autoSign")
