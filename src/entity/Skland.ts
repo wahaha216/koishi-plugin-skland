@@ -311,7 +311,7 @@ export class Skland {
           this.logger.info("签到结果数据：");
           this.logger.info(resJson);
         }
-        const name_app_channel = `\n${app.appName}（${binding.channelName}） - ${playerName}`;
+        const name_app_channel = `${app.appName}（${binding.channelName}） - ${playerName}`;
         // 请求成功
         switch (resJson.code) {
           case 0: {
@@ -356,6 +356,7 @@ export class Skland {
         }
       }
     }
+    return text;
   }
 
   public async getSklandUserInfo(token: string): Promise<TeenagerData> {
