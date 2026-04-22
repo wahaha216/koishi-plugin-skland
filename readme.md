@@ -136,6 +136,14 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.1.4</summary>
+
+1. 手动签到
+2. 修复签到返回 `undefined`
+
+</details>
+
+<details>
 <summary>0.1.3</summary>
 
 1. 添加更多debug控制
