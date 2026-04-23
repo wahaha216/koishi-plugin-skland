@@ -136,6 +136,13 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.1.5</summary>
+
+修正据点发展值
+
+</details>
+
+<details>
 <summary>0.1.4</summary>
 
 1. 手动签到
