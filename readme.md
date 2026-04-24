@@ -136,6 +136,14 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.1.6</summary>
+
+1. 调整免费抽显示，修改为如果出6星就不再显示后续免费抽数
+2. 调整欧非计算（使用带继承的数值计算）
+
+</details>
+
+<details>
 <summary>0.1.5</summary>
 
 修正据点发展值
