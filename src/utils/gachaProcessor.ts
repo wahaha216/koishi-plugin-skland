@@ -122,10 +122,6 @@ export function processEndfieldPool(
         if (isGold) {
           const name = "charName" in item ? item.charName : item.weaponName;
           const isUp = name === poolInfo?.up6_name;
-          const isPity =
-            isChar && category !== "E_CharacterGachaPoolType_Beginner"
-              ? pityCount >= 70
-              : pityCount === 40;
           const is40MaxPityPool =
             category === "" || category === "E_CharacterGachaPoolType_Beginner";
           if (isUp) poolDetail.upCount++;
@@ -135,19 +131,21 @@ export function processEndfieldPool(
           // 当前抽数
           const currentCount =
             isFirst6 && category === "E_CharacterGachaPoolType_Special"
-              ? pityCount
-              : pityCount + lastPityValue;
+              ? pityCount + lastPityValue
+              : pityCount;
           // 保底数
           const maxPity = is40MaxPityPool ? 40 : 80;
           const percent = calPercent(currentCount, maxPity);
+          const isPity =
+            isChar && category !== "E_CharacterGachaPoolType_Beginner"
+              ? currentCount >= 70
+              : currentCount === 40;
 
           poolDetail.six.push({
             name,
             pulls: pityCount,
             isUp,
-            isLucky: isChar
-              ? pityCount + lastPityValue <= 10
-              : pityCount + lastPityValue <= 5,
+            isLucky: isChar ? currentCount <= 10 : currentCount <= 5,
             isPity,
             avatarUrl: avatarUrl || "",
             isNew: item.isNew,
