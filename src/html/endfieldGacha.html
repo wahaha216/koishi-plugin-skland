@@ -614,9 +614,9 @@
             </div>
             <div class="pulls-info">
               <span class="pulls-num">
-                {{#if isFree}}--{{else}}{{#if
-                lastPity}}{{lastPity}}+{{/if}}{{pulls}}{{/if}}</span
-              >
+                {{#if isFree}} {{#if pulls}} {{pulls}} {{else}} -- {{/if}}
+                {{else}} {{#if lastPity}}{{lastPity}}+{{/if}}{{pulls}} {{/if}}
+              </span>
               {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}{{#unless
               isFree}}<span class="tag tag-off">歪</span>{{/unless}}{{/if}}
               {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
@@ -661,11 +661,8 @@
             </div>
             <div class="pulls-info">
               <span class="pulls-num"> {{pulls}} </span>
-              {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}<span
-                class="tag tag-off"
-              >
-                歪
-              </span>
+              {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}
+              <span class="tag tag-off"> 歪 </span>
               {{/if}} {{#if isLucky}}<span class="tag tag-lucky">欧</span>
               {{/if}} {{#if isPity}}<span class="tag tag-pity">非</span>{{/if}}
             </div>

@@ -67,8 +67,13 @@ export function processEndfieldPool(
     };
 
     let pityCount = 0;
-    let freeBuffer = 0;
+    let freePityCount = 0;
     let isFirst6 = true;
+
+    const freeItems = items.filter(
+      (item) => item.category !== "" && item.isFree,
+    );
+    const hasGoldInFree = freeItems.some((item) => item.rarity === 6);
 
     items.forEach((item, idx) => {
       const isGold = item.rarity === 6;
@@ -78,24 +83,39 @@ export function processEndfieldPool(
             .avatarSqUrl
         : `https://lulush.microgg.cn/BeyondUID/resource/itemiconbig/${item.weaponId}.png`;
       if (item.category !== "" && item.isFree) {
-        freeBuffer++;
-        const next = items[idx + 1];
-        // 下一项必须存在、且也是角色类型、且也是免费，isNextFree 才是 true
-        const isNextFree = next && isCharacterGacha(next) && next.isFree;
-        const name = isGold ? item.charName : `赠送寻访 ×${freeBuffer}`;
-        const isUp = name === poolInfo?.up6_name;
-        if (isUp) poolDetail.upCount++;
-        if (isGold || !next || !isNextFree) {
-          poolDetail.six.push({
-            name,
-            isUp,
-            pulls: 0,
-            isFree: true,
-            avatarUrl: isGold ? avatarUrl || "" : "",
-          });
-          freeBuffer = 0;
+        if (hasGoldInFree) {
+          // 兼容多金：如果是 6 星就推送，不是就静默
+          if (item.rarity === 6) {
+            const pullIndex = freeItems.indexOf(item) + 1;
+            const name = item.charName;
+            const isUp = name === poolInfo?.up6_name;
+            if (isUp) poolDetail.upCount++;
+
+            poolDetail.six.push({
+              name,
+              isUp,
+              pulls: pullIndex,
+              isFree: true,
+              avatarUrl: avatarUrl || "",
+              isLucky: pullIndex <= 10,
+              isNew: item.isNew,
+            });
+          }
+        } else {
+          // 全都没中：只在处理到最后一个免费项时推送一次统计
+          const isLastFree = item === freeItems[freeItems.length - 1];
+          if (isLastFree) {
+            poolDetail.six.push({
+              name: `赠送寻访 ×${freeItems.length}`,
+              isUp: false,
+              pulls: 0,
+              isFree: true,
+              avatarUrl: "",
+            });
+          }
         }
       } else {
+        freePityCount = 0;
         pityCount++;
         categoryPityMap[category]++;
         poolDetail.total++;
