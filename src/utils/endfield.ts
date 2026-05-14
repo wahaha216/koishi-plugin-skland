@@ -78,7 +78,7 @@ export const buildEndfieldCardJson = (
         expPercent:
           s.expToLevelUp === "0"
             ? "100%"
-            : calPercent(Number(s.exp), Number(s.exp) + Number(s.expToLevelUp)),
+            : calPercent(Number(s.exp), Number(s.expToLevelUp)),
         maxExp: toThousandsls(Number(s.exp) + Number(s.expToLevelUp)),
       }),
     );
