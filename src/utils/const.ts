@@ -8,6 +8,7 @@ export enum ENDFIELD_POOL_TYPE {
   STANDARD = "E_CharacterGachaPoolType_Standard",
   SPECIAL = "E_CharacterGachaPoolType_Special",
   BEGINNER = "E_CharacterGachaPoolType_Beginner",
+  JOINT = "E_CharacterGachaPoolType_Joint",
   WEAPON = "",
 }
 

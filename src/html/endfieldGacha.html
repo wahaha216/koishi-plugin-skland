@@ -675,8 +675,34 @@
       </div>
 
       <div class="column">
-        <div class="column-title">基础寻访 & 启程寻访</div>
+        <div class="column-title">其他寻访</div>
         {{#each pools.STANDARD}}
+        <div class="pool-card">
+          <div class="pool-header">
+            <b class="pool-name">{{name}}</b>
+            <span class="pool-total">{{total}} 抽</span>
+          </div>
+          {{#each six}}
+          <div
+            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
+          >
+            <div
+              class="char-avatar"
+              style="background-image: url('{{avatarUrl}}');"
+            ></div>
+            <div class="track">
+              <div class="fill" style="width: {{percent}}"></div>
+              <span class="char-name">{{name}}</span>
+            </div>
+            <div class="pulls-info">
+              <span class="pulls-num">{{pulls}}</span>
+              {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
+              isPity}}<span class="tag tag-pity">非</span>{{/if}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}} {{#each pools.JOINT}}
         <div class="pool-card">
           <div class="pool-header">
             <b class="pool-name">{{name}}</b>

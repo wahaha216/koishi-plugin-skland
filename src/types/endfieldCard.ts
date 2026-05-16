@@ -106,6 +106,7 @@ export interface EndfieldCard {
     special: GachaWichPie;
     beginner: GachaWichPie;
     weapon: GachaWichPie;
+    joint: GachaWichPie;
   };
   /** 卡池详情 */
   pools: Record<keyof typeof ENDFIELD_POOL_TYPE, PoolsInfo[]>;

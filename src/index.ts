@@ -124,6 +124,10 @@ export async function apply(ctx: Context, config: Config) {
       ticket_name: "string",
       ticket_ten_name: "string",
       all: "array",
+      once_reward_name: "string",
+      rotate_reward_name: "string",
+      rotate_reward_item_list: "array",
+      hard_guarantee_char_list: "array",
     },
     { primary: "pool_id" },
   );
@@ -200,18 +204,6 @@ export async function apply(ctx: Context, config: Config) {
     const role = await ctx.database.get("skland_role", { userId, gameName });
     return !!role.length;
   };
-
-  // ctx.command("skland-user").action(async ({ session, options }) => {
-  //   const skland = new Skland(config, ctx.http, logger);
-  //   const playerInfo = await skland.getCardDetail();
-  //   logger.info(playerInfo);
-  // });
-
-  // ctx.command("skland-test").action(async ({ session, options }) => {
-  //   const messageId = session.messageId;
-  //   const skland = new Skland(config, ctx.http, logger);
-  //   const { userId, userBind } = await getUserBind(session);
-  // });
 
   /**
    * 同步所有卡池信息
@@ -300,6 +292,7 @@ export async function apply(ctx: Context, config: Config) {
             E_CharacterGachaPoolType_Beginner: 0,
             E_CharacterGachaPoolType_Standard: 0,
             E_CharacterGachaPoolType_Special: 0,
+            E_CharacterGachaPoolType_Joint: 0,
             Weapon: weaponStats[0]?.maxSeq || 0,
           };
 
@@ -339,6 +332,8 @@ export async function apply(ctx: Context, config: Config) {
                 category = ENDFIELD_POOL_TYPE.STANDARD;
               } else if (gacha.poolId === "beginner") {
                 category = ENDFIELD_POOL_TYPE.BEGINNER;
+              } else if (gacha.poolId.startsWith("joint")) {
+                category = ENDFIELD_POOL_TYPE.JOINT;
               }
 
               return { ...gacha, category, userId };
@@ -473,6 +468,9 @@ export async function apply(ctx: Context, config: Config) {
         const specialData = charData
           .filter((c) => c.category === ENDFIELD_POOL_TYPE.SPECIAL)
           .reverse();
+        const jointData = charData.filter(
+          (c) => c.category === ENDFIELD_POOL_TYPE.JOINT,
+        );
 
         const specialGacha = charGachaList.filter(
           (g) => g.category === ENDFIELD_POOL_TYPE.SPECIAL,
@@ -482,6 +480,9 @@ export async function apply(ctx: Context, config: Config) {
         );
         const beginnerGacha = charGachaList.filter(
           (g) => g.category === ENDFIELD_POOL_TYPE.BEGINNER,
+        );
+        const jointGacha = charGachaList.filter(
+          (g) => g.category === ENDFIELD_POOL_TYPE.JOINT,
         );
 
         const crystalJade = formatNumber(
@@ -543,12 +544,22 @@ export async function apply(ctx: Context, config: Config) {
               ...getPoolInfo(weaponData.reverse(), weaponGachaList),
               stats: calculatePoolStats(weaponGachaList),
             },
+            joint: {
+              ...getPoolInfo(
+                jointData,
+                charGachaList.filter(
+                  (g) => g.category === ENDFIELD_POOL_TYPE.JOINT,
+                ),
+              ),
+              stats: calculatePoolStats(jointGacha),
+            },
           },
           pools: {
             BEGINNER: beginnerData,
             SPECIAL: specialData,
             STANDARD: standardData,
             WEAPON: weaponData,
+            JOINT: jointData,
           },
         };
 

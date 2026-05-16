@@ -2,6 +2,7 @@ export type GachaCategory =
   | "E_CharacterGachaPoolType_Standard"
   | "E_CharacterGachaPoolType_Beginner"
   | "E_CharacterGachaPoolType_Special"
+  | "E_CharacterGachaPoolType_Joint"
   | "";
 
 export interface EndfieldCharacterGacha {
@@ -47,6 +48,10 @@ export interface EndfieldCharPool {
   ticket_ten_name: string;
   all: { id: string; name: string; rarity: 4 | 5 | 6 }[];
   rotate_list: { name: string; times: 1 | 2 | 3; image?: string }[];
+  once_reward_name: string;
+  rotate_reward_name: string;
+  rotate_reward_item_list: string[];
+  hard_guarantee_char_list: string[];
 }
 
 export interface EndfieldWeaponPool {
