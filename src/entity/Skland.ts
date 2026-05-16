@@ -420,7 +420,7 @@ export class Skland {
     }
     const params = { roleId, serverId, userId };
     const paramsStr = new URLSearchParams(params).toString();
-    this.logger.info(`请求玩家信息，参数：${paramsStr}`);
+    if (this.config.debug) this.logger.info(`请求玩家信息，参数：${paramsStr}`);
     const pathname = new URL(SKLAND_API.ENDFIELD.PLAYER_INFO).pathname;
 
     const { md5Sign: sign, signHeader: sh } = this.generateSign(
