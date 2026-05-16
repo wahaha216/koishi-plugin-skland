@@ -68,7 +68,7 @@ TODO
     <td>skland endfield gacha sync</td>
     <td> - </td>
     <td> - </td>
-    <td>同步卡池信息，官方只开发UP池信息<br />该指令将从 <a href="https://github.com/FrostN0v0/EndfieldGachaPoolTable">github</a> 获取别人收集的信息</td>
+    <td>同步卡池信息，官方只开放UP池信息<br />该指令将从 <a href="https://github.com/wahaha216/koishi-plugin-skland">github</a> 获取收集的卡池信息</td>
   </tr>
   <tr>
     <td>skland endfield card</td>
@@ -134,6 +134,13 @@ TODO
 - [ ] 可能存在免费抽出6星显示异常
 
 ## 更新记录
+
+<details>
+<summary>0.1.8</summary>
+
+支持辉光庆典
+
+</details>
 
 <details>
 <summary>0.1.7</summary>
