@@ -12,7 +12,6 @@
         --text-dim: #88888e;
         --color-gold: #b58d59;
         --color-purple: #9b59b6;
-        --color-four: #4e8ca1;
         --color-lucky: #4a9e5f;
         --color-pity: #a34646;
         --color-off: #44444a;
@@ -82,7 +81,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        min-height: 180px; /* 增加高度以容纳饼图 */
+        min-height: 180px;
       }
       .card-title {
         font-size: 10px;
@@ -128,7 +127,7 @@
         background: var(--color-gold);
       }
 
-      /* 饼图样式 (卡片底部) */
+      /* 饼图样式 */
       .card-pie-footer {
         display: flex;
         align-items: center;
@@ -170,7 +169,7 @@
         margin-right: 4px;
       }
 
-      /* --- 底部列表详情 (完全还原原始样式) --- */
+      /* --- 底部列表详情 --- */
       .gacha-dashboard {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -317,27 +316,64 @@
         background: #4e8ca1;
       }
 
+      .no-six-placeholder {
+        justify-content: center;
+        color: var(--text-dim);
+        font-size: 11px;
+        margin: 4px 12px;
+      }
       .footer-notes {
         margin-top: 20px;
         font-size: 10px;
         color: var(--text-dim);
       }
-
       .footer-signature {
         width: 100%;
         text-align: center;
-        padding: 20px 0 10px 0; /* 增加顶部间距，与上方内容拉开距离 */
+        padding: 20px 0 10px 0;
         font-size: 10px;
         color: var(--text-dim);
         opacity: 0.6;
         font-family: "monospace", sans-serif;
-        text-transform: uppercase; /* 全大写 */
+        text-transform: uppercase;
         letter-spacing: 1px;
-        border-top: 1px solid rgba(255, 255, 255, 0.05); /* 淡淡的分割线 */
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
       }
     </style>
   </head>
   <body>
+    {{#*inline "sixList"}} {{#each six}}
+    <div
+      class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}} {{#if isFree}}is-free{{/if}}"
+    >
+      <div
+        class="char-avatar"
+        style="background-image: {{#if avatarUrl}}url('{{avatarUrl}}'){{else if ../isSpecial}}var(--img-gift){{else}}url('{{avatarUrl}}'){{/if}};"
+      ></div>
+      <div class="track">
+        <div class="fill" style="width: {{percent}}"></div>
+        <span class="char-name">{{name}}</span>
+      </div>
+      <div class="pulls-info">
+        <span class="pulls-num">
+          {{#if ../isSpecial}} {{#if isFree}} {{#if
+          pulls}}{{pulls}}{{else}}--{{/if}} {{else}} {{#if lastPity}}<span
+            style="color: var(--text-dim)"
+            >{{lastPity}}+</span
+          >{{/if}}{{pulls}} {{/if}} {{else}} {{pulls}} {{/if}}
+        </span>
+
+        {{#if ../hasUp}} {{#if isUp}}<span class="tag tag-up">UP</span
+        >{{else}}{{#unless isFree}}<span class="tag tag-off">歪</span
+        >{{/unless}}{{/if}} {{/if}} {{#if isLucky}}<span class="tag tag-lucky"
+          >欧</span
+        >{{/if}} {{#if isPity}}<span class="tag tag-pity">非</span>{{/if}}
+      </div>
+    </div>
+    {{/each}} {{#unless six}}
+    <div class="char-row no-six-placeholder">当前卡池未出6星</div>
+    {{/unless}} {{/inline}}
+
     <div class="player-header">
       <div
         class="player-avatar"
@@ -397,7 +433,6 @@
           <div class="card-pulls">
             {{total}}<span>抽 </span>{{averageUpPulls}}<span>UP平均</span>
           </div>
-
           <div class="pity-mini-box">
             <div class="card-detail-row">
               <span class="detail-counts">保底: {{currentPity}} / 40</span>
@@ -505,6 +540,7 @@
         </div>
       </div>
       {{/with}}
+
       <div
         class="stat-card overall-assets"
         style="border-left: 3px solid var(--color-gold); min-height: 180px"
@@ -533,7 +569,6 @@
                 {{crystalJade}}
               </span>
             </div>
-
             <div
               style="
                 display: flex;
@@ -554,7 +589,6 @@
                 {{weaponQuota}}
               </span>
             </div>
-
             <div
               style="
                 display: flex;
@@ -600,46 +634,7 @@
               {{currentPity}}
             </span>
           </div>
-          {{#each six}}
-          <div
-            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}} {{#if isFree}}is-free{{/if}}"
-          >
-            <div
-              class="char-avatar"
-              style="background-image: {{#if avatarUrl}}url('{{avatarUrl}}'){{else}}var(--img-gift){{/if}};"
-            ></div>
-            <div class="track">
-              <div class="fill" style="width: {{percent}}"></div>
-              <span class="char-name">{{name}}</span>
-            </div>
-            <div class="pulls-info">
-              <span class="pulls-num">
-                {{#if isFree}} {{#if pulls}} {{pulls}} {{else}} -- {{/if}}
-                {{else}} {{#if lastPity}}
-                <span style="color: var(--text-dim)">{{lastPity}}+</span
-                >{{/if}}{{pulls}} {{/if}}
-              </span>
-              {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}{{#unless
-              isFree}}<span class="tag tag-off">歪</span>{{/unless}}{{/if}}
-              {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
-              isPity}}<span class="tag tag-pity">非</span>{{/if}}
-            </div>
-          </div>
-          {{/each}} {{#unless six}}
-          <div
-            class="char-row"
-            style="
-              justify-content: center;
-              color: var(--text-dim);
-              font-size: 11px;
-              border: 1px dashed #222;
-              margin: 4px 12px;
-              border-radius: 2px;
-            "
-          >
-            当前卡池未出6星
-          </div>
-          {{/unless}}
+          {{> sixList isSpecial=true hasUp=true}}
         </div>
         {{/each}}
       </div>
@@ -663,39 +658,7 @@
               {{currentPity}}
             </span>
           </div>
-          {{#each six}}
-          <div
-            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
-          >
-            <div
-              class="char-avatar"
-              style="background-image: url('{{avatarUrl}}');"
-            ></div>
-            <div class="track">
-              <div class="fill" style="width: {{percent}}"></div>
-              <span class="char-name">{{name}}</span>
-            </div>
-            <div class="pulls-info">
-              <span class="pulls-num"> {{pulls}} </span>
-              {{#if isUp}}<span class="tag tag-up">UP</span>{{else}}
-              <span class="tag tag-off"> 歪 </span>
-              {{/if}} {{#if isLucky}}<span class="tag tag-lucky">欧</span>
-              {{/if}} {{#if isPity}}<span class="tag tag-pity">非</span>{{/if}}
-            </div>
-          </div>
-          {{/each}} {{#unless six}}
-          <div
-            class="char-row"
-            style="
-              justify-content: center;
-              color: var(--text-dim);
-              font-size: 11px;
-              margin: 4px 12px;
-            "
-          >
-            当前卡池未出6星
-          </div>
-          {{/unless}}
+          {{> sixList hasUp=true}}
         </div>
         {{/each}}
       </div>
@@ -708,37 +671,7 @@
             <b class="pool-name">{{name}}</b>
             <span class="pool-total">{{total}} 抽</span>
           </div>
-          {{#each six}}
-          <div
-            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
-          >
-            <div
-              class="char-avatar"
-              style="background-image: url('{{avatarUrl}}');"
-            ></div>
-            <div class="track">
-              <div class="fill" style="width: {{percent}}"></div>
-              <span class="char-name">{{name}}</span>
-            </div>
-            <div class="pulls-info">
-              <span class="pulls-num">{{pulls}}</span>
-              {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
-              isPity}}<span class="tag tag-pity">非</span>{{/if}}
-            </div>
-          </div>
-          {{/each}} {{#unless six}}
-          <div
-            class="char-row"
-            style="
-              justify-content: center;
-              color: var(--text-dim);
-              font-size: 11px;
-              margin: 4px 12px;
-            "
-          >
-            当前卡池未出6星
-          </div>
-          {{/unless}}
+          {{> sixList}}
         </div>
         {{/each}} {{#each pools.JOINT}}
         <div class="pool-card">
@@ -746,78 +679,15 @@
             <b class="pool-name">{{name}}</b>
             <span class="pool-total">{{total}} 抽</span>
           </div>
-          {{#each six}}
-          <div
-            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
-          >
-            <div
-              class="char-avatar"
-              style="background-image: url('{{avatarUrl}}');"
-            ></div>
-            <div class="track">
-              <div class="fill" style="width: {{percent}}"></div>
-              <span class="char-name">{{name}}</span>
-            </div>
-            <div class="pulls-info">
-              <span class="pulls-num">{{pulls}}</span>
-              {{#if isLucky}}<span class="tag tag-lucky">欧</span>{{/if}} {{#if
-              isPity}}<span class="tag tag-pity">非</span>{{/if}}
-            </div>
-          </div>
-          {{/each}} {{#unless six}}
-          <div
-            class="char-row"
-            style="
-              justify-content: center;
-              color: var(--text-dim);
-              font-size: 11px;
-              margin: 4px 12px;
-            "
-          >
-            当前卡池未出6星
-          </div>
-          {{/unless}}
+          {{> sixList}}
         </div>
         {{/each}} {{#each pools.BEGINNER}}
         <div class="pool-card" style="border: 1px dashed #444">
           <div class="pool-header">
-            <b class="pool-name">{{name}}</b
-            ><span class="pool-total">{{total}} 抽</span>
+            <b class="pool-name">{{name}}</b>
+            <span class="pool-total">{{total}} 抽</span>
           </div>
-          {{#each six}}
-          <div
-            class="char-row {{#if isLucky}}lucky{{/if}} {{#if isPity}}pity{{/if}}"
-          >
-            <div
-              class="char-avatar"
-              style="background-image: url('{{avatarUrl}}');"
-            ></div>
-            <div class="track">
-              <div
-                class="fill"
-                style="width: {{percent}}; background: var(--color-four);"
-              ></div>
-              <span class="char-name">{{name}}</span>
-            </div>
-            <div class="pulls-info">
-              <span class="pulls-num">{{pulls}}</span>
-              {{#if isLucky}}<span class="tag tag-lucky">欧</span> {{/if}} {{#if
-              isPity}}<span class="tag tag-pity">非</span>{{/if}}
-            </div>
-          </div>
-          {{/each}} {{#unless six}}
-          <div
-            class="char-row"
-            style="
-              justify-content: center;
-              color: var(--text-dim);
-              font-size: 11px;
-              margin: 4px 12px;
-            "
-          >
-            当前卡池未出6星
-          </div>
-          {{/unless}}
+          {{> sixList}}
         </div>
         {{/each}}
       </div>
