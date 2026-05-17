@@ -35,29 +35,33 @@
         width: 1200px;
       }
 
-      /* --- 顶部玩家面板 --- */
+      /* --- 顶部玩家面板（已改造：支持右侧右对齐放资产） --- */
       .player-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
         background: var(--bg-card);
-        padding: 20px 30px;
+        padding: 15px 30px;
         border-radius: 8px;
         margin-bottom: 20px;
         border: 1px solid #222;
       }
+      .player-left {
+        display: flex;
+        align-items: center;
+      }
       .player-avatar {
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         background-size: cover;
         border: 2px solid var(--color-gold);
       }
       .player-info {
         margin-left: 20px;
-        flex: 1;
       }
       .player-name {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
       }
       .player-uid {
@@ -66,7 +70,27 @@
         margin-top: 4px;
       }
 
-      /* --- 顶部 5 列垂直布局 --- */
+      /* 头部右侧横向资产样式 */
+      .header-assets {
+        display: flex;
+        gap: 35px;
+      }
+      .asset-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+      }
+      .asset-label {
+        font-size: 11px;
+        color: var(--text-dim);
+      }
+      .asset-value {
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      /* --- 顶部 5 列布局 --- */
       .global-stats {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -375,13 +399,35 @@
     {{/unless}} {{/inline}}
 
     <div class="player-header">
-      <div
-        class="player-avatar"
-        style="background-image: url('{{avatarUrl}}');"
-      ></div>
-      <div class="player-info">
-        <div class="player-name">{{name}}</div>
-        <div class="player-uid">UID: {{uid}}</div>
+      <div class="player-left">
+        <div
+          class="player-avatar"
+          style="background-image: url('{{avatarUrl}}');"
+        ></div>
+        <div class="player-info">
+          <div class="player-name">{{name}}</div>
+          <div class="player-uid">UID: {{uid}}</div>
+        </div>
+      </div>
+      <div class="header-assets">
+        <div class="asset-item">
+          <span class="asset-label">嵌晶玉消耗</span>
+          <span class="asset-value" style="color: #f0f0f2"
+            >{{crystalJade}}</span
+          >
+        </div>
+        <div class="asset-item">
+          <span class="asset-label">武器配额获取</span>
+          <span class="asset-value" style="color: var(--color-gold)"
+            >{{weaponQuota}}</span
+          >
+        </div>
+        <div class="asset-item">
+          <span class="asset-label">武器配额消耗</span>
+          <span class="asset-value" style="color: var(--color-pity)"
+            >{{useWeaponQuota}}</span
+          >
+        </div>
       </div>
     </div>
 
@@ -504,6 +550,44 @@
           </div>
         </div>
       </div>
+      {{/with}}{{#with gacha.joint}}
+      <div class="stat-card">
+        <div>
+          <div class="card-title">庆典寻访</div>
+          <div class="card-pulls">{{total}}<span>抽 </span></div>
+          <div class="pity-mini-box">
+            <div class="card-detail-row">
+              <span class="detail-counts">保底: {{currentPity}} / 80</span>
+            </div>
+            <div class="pity-bar-bg">
+              <div class="pity-bar-fill" style="width: {{percent}}"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-pie-footer">
+          <div
+            class="mini-pie"
+            style="background: conic-gradient(var(--color-six) 0% {{stats.sixP}}%, var(--color-five) {{stats.sixP}}% {{stats.fivePSum}}%, var(--color-four) {{stats.fivePSum}}% 100%);"
+          ></div>
+          <div class="pie-legend">
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-six)"></div>
+              <div class="precent">{{stats.sixP}}%</div>
+              <div class="num">6★ {{stats.six}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-five)"></div>
+              <div class="precent">{{stats.fiveP}}%</div>
+              <div class="num">5★ {{stats.five}}</div>
+            </div>
+            <div class="pie-data">
+              <div class="dot" style="background: var(--color-four)"></div>
+              <div class="precent">{{stats.fourP}}%</div>
+              <div class="num">4★ {{stats.four}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
       {{/with}} {{#with gacha.beginner}}
       <div class="stat-card">
         <div>
@@ -540,78 +624,6 @@
         </div>
       </div>
       {{/with}}
-
-      <div
-        class="stat-card overall-assets"
-        style="border-left: 3px solid var(--color-gold); min-height: 180px"
-      >
-        <div>
-          <div class="card-title">寻访资产总计</div>
-          <div
-            style="
-              margin-top: 15px;
-              display: flex;
-              flex-direction: column;
-              gap: 8px;
-            "
-          >
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-              "
-            >
-              <span style="font-size: 11px; color: var(--text-dim)">
-                嵌晶玉消耗
-              </span>
-              <span style="font-size: 18px; font-weight: 800; color: #f0f0f2">
-                {{crystalJade}}
-              </span>
-            </div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-              "
-            >
-              <span style="font-size: 11px; color: var(--text-dim)">
-                武器配额获取
-              </span>
-              <span
-                style="
-                  font-size: 18px;
-                  font-weight: 800;
-                  color: var(--color-gold);
-                "
-              >
-                {{weaponQuota}}
-              </span>
-            </div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-              "
-            >
-              <span style="font-size: 11px; color: var(--text-dim)">
-                武器配额消耗
-              </span>
-              <span
-                style="
-                  font-size: 18px;
-                  font-weight: 800;
-                  color: var(--color-pity);
-                "
-              >
-                {{useWeaponQuota}}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="gacha-dashboard">
