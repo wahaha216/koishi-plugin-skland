@@ -625,7 +625,21 @@
               isPity}}<span class="tag tag-pity">非</span>{{/if}}
             </div>
           </div>
-          {{/each}}
+          {{/each}} {{#unless six}}
+          <div
+            class="char-row"
+            style="
+              justify-content: center;
+              color: var(--text-dim);
+              font-size: 11px;
+              border: 1px dashed #222;
+              margin: 4px 12px;
+              border-radius: 2px;
+            "
+          >
+            当前卡池未出6星
+          </div>
+          {{/unless}}
         </div>
         {{/each}}
       </div>
@@ -669,7 +683,19 @@
               {{/if}} {{#if isPity}}<span class="tag tag-pity">非</span>{{/if}}
             </div>
           </div>
-          {{/each}}
+          {{/each}} {{#unless six}}
+          <div
+            class="char-row"
+            style="
+              justify-content: center;
+              color: var(--text-dim);
+              font-size: 11px;
+              margin: 4px 12px;
+            "
+          >
+            当前卡池未出6星
+          </div>
+          {{/unless}}
         </div>
         {{/each}}
       </div>
@@ -700,7 +726,19 @@
               isPity}}<span class="tag tag-pity">非</span>{{/if}}
             </div>
           </div>
-          {{/each}}
+          {{/each}} {{#unless six}}
+          <div
+            class="char-row"
+            style="
+              justify-content: center;
+              color: var(--text-dim);
+              font-size: 11px;
+              margin: 4px 12px;
+            "
+          >
+            当前卡池未出6星
+          </div>
+          {{/unless}}
         </div>
         {{/each}} {{#each pools.JOINT}}
         <div class="pool-card">
@@ -726,7 +764,19 @@
               isPity}}<span class="tag tag-pity">非</span>{{/if}}
             </div>
           </div>
-          {{/each}}
+          {{/each}} {{#unless six}}
+          <div
+            class="char-row"
+            style="
+              justify-content: center;
+              color: var(--text-dim);
+              font-size: 11px;
+              margin: 4px 12px;
+            "
+          >
+            当前卡池未出6星
+          </div>
+          {{/unless}}
         </div>
         {{/each}} {{#each pools.BEGINNER}}
         <div class="pool-card" style="border: 1px dashed #444">
@@ -755,7 +805,19 @@
               isPity}}<span class="tag tag-pity">非</span>{{/if}}
             </div>
           </div>
-          {{/each}}
+          {{/each}} {{#unless six}}
+          <div
+            class="char-row"
+            style="
+              justify-content: center;
+              color: var(--text-dim);
+              font-size: 11px;
+              margin: 4px 12px;
+            "
+          >
+            当前卡池未出6星
+          </div>
+          {{/unless}}
         </div>
         {{/each}}
       </div>
