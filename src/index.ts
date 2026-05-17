@@ -571,7 +571,11 @@ export async function apply(ctx: Context, config: Config) {
         const template = hbs.compile(templateHtml);
         const finalHtml = template(card);
 
-        return await ctx.puppeteer.render(finalHtml);
+        const image = await ctx.puppeteer.render(finalHtml);
+
+        const base64 = image.replace('<img src="', "").replace('"/>', "");
+
+        await session.send([h.quote(messageId), h.img(base64)]);
       } catch (err) {
         return [h.quote(messageId), h.text(`获取抽卡分析失败：${err.message}`)];
       }
