@@ -18,7 +18,7 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 基于现有数据向后探测（支持 A 变化，并更新已有池子）
+      - name: 基于现有数据向后探测（分别处理 special 和 weponbox）
         id: detector
         uses: actions/github-script@v7
         with:
@@ -29,40 +29,50 @@ jobs:
             const filePath = path.join(process.env.GITHUB_WORKSPACE, 'src/data/gacha_map.json');
             let gachaMap = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : {};
 
-            // 1. 从现有 special_ 和 weponbox_ 中找出最大的 (A, B, C)
-            let maxA = 1, maxB = 0, maxC = 1;
+            // 分别找出 special 和 weponbox 的最大 (A, B, C)
+            let maxSpecial = { a: 1, b: 0, c: 1 };
+            let maxWepon = { a: 1, b: 0, c: 1 };
+
             Object.keys(gachaMap).forEach(id => {
-              if (!id.startsWith('special_') && !id.startsWith('weponbox_')) return;
               const parts = id.split('_');
-              if (parts.length >= 4) {
-                const a = parseInt(parts[1]);
-                const b = parseInt(parts[2]);
-                const c = parseInt(parts[3]);
-                if (a > maxA) {
-                  maxA = a; maxB = b; maxC = c;
-                } else if (a === maxA) {
-                  if (b > maxB) {
-                    maxB = b; maxC = c;
-                  } else if (b === maxB && c > maxC) {
-                    maxC = c;
-                  }
+              if (parts.length < 4) return;
+              const type = parts[0];
+              const a = parseInt(parts[1]);
+              const b = parseInt(parts[2]);
+              const c = parseInt(parts[3]);
+              
+              if (type === 'special') {
+                if (a > maxSpecial.a || (a === maxSpecial.a && b > maxSpecial.b) || (a === maxSpecial.a && b === maxSpecial.b && c > maxSpecial.c)) {
+                  maxSpecial = { a, b, c };
+                }
+              } else if (type === 'weponbox') {
+                if (a > maxWepon.a || (a === maxWepon.a && b > maxWepon.b) || (a === maxWepon.a && b === maxWepon.b && c > maxWepon.c)) {
+                  maxWepon = { a, b, c };
                 }
               }
             });
-            console.log(`📌 当前最新卡池锚点: A=${maxA}, B=${maxB}, C=${maxC}`);
 
-            // 2. 构建候选探测计划（包含刷新当前池 + 后续可能的新池）
-            const candidates = [
-              { a: maxA, b: maxB, c: maxC },          // 刷新当前池（官方可能补全数据）
-              { a: maxA, b: maxB, c: maxC + 1 },      // 同版本下一池
-              { a: maxA, b: maxB, c: maxC + 2 },      // 同版本下两池
-              { a: maxA, b: maxB + 1, c: 1 },         // 下一个小版本首池
-              { a: maxA, b: maxB + 1, c: 2 },         // 下一个小版本第二池
-              { a: maxA + 1, b: 0, c: 1 }             // 下一个大版本首池
-            ];
+            console.log(`📌 当前 special 最新锚点: A=${maxSpecial.a}, B=${maxSpecial.b}, C=${maxSpecial.c}`);
+            console.log(`📌 当前 weponbox 最新锚点: A=${maxWepon.a}, B=${maxWepon.b}, C=${maxWepon.c}`);
 
-            // 去重（避免重复，比如 C 和 C+1 等）
-            const uniqueCandidates = Array.from(new Set(candidates.map(p => `${p.a}_${p.b}_${p.c}`)))
+            // 生成候选列表的函数（基于给定的最大锚点）
+            function generateCandidates(maxA, maxB, maxC) {
+              return [
+                { a: maxA, b: maxB, c: maxC },          // 刷新当前池
+                { a: maxA, b: maxB, c: maxC + 1 },      // 同版本下一池
+                { a: maxA, b: maxB, c: maxC + 2 },      // 同版本下两池
+                { a: maxA, b: maxB + 1, c: 1 },         // 下一个小版本首池
+                { a: maxA, b: maxB + 1, c: 2 },         // 下一个小版本第二池
+                { a: maxA + 1, b: 0, c: 1 }             // 下一个大版本首池
+              ];
+            }
+
+            // 分别生成 special 和 weponbox 的候选，合并去重
+            const specialCandidates = generateCandidates(maxSpecial.a, maxSpecial.b, maxSpecial.c);
+            const weponCandidates = generateCandidates(maxWepon.a, maxWepon.b, maxWepon.c);
+            const allCandidates = [...specialCandidates, ...weponCandidates];
+            
+            const uniqueCandidates = Array.from(new Set(allCandidates.map(p => `${p.a}_${p.b}_${p.c}`)))
                                            .map(s => {
                                              const [a, b, c] = s.split('_');
                                              return { a: parseInt(a), b: parseInt(b), c: parseInt(c) };
@@ -95,17 +105,17 @@ jobs:
               return false;
             }
 
-            // 3. 依次探测所有候选（刷新已有池 + 探测新池）
+            // 遍历所有去重后的候选三元组，分别请求 special 和 weponbox
             for (const cand of uniqueCandidates) {
               console.log(`🔍 探测候选: A=${cand.a}, B=${cand.b}, C=${cand.c}`);
               await fetchPool('special', cand.a, cand.b, cand.c);
               await fetchPool('weponbox', cand.a, cand.b, cand.c);
             }
 
-            // 4. 保存更新后的文件
+            // 保存更新后的文件
             fs.writeFileSync(filePath, JSON.stringify(gachaMap, null, 2));
 
-            // 5. 输出新抓到的 ID 给 commit 步骤
+            // 输出新抓到的 ID
             core.setOutput('ids', newFetchedIds.join(', '));
 
       - name: 提交更新到仓库
