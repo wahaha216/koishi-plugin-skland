@@ -2,13 +2,11 @@ name: Gacha Smart Discovery Sync
 
 on:
   schedule:
-    - cron: '1 4 * * *' # 北京时间 12:01 自动运行
-  workflow_dispatch:   # 保留手动触发按钮
+    - cron: '1 4 * * *'
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  BASE_DATE: '2026-03-12T12:00:00+08:00'
-  CYCLE_DAYS: 17
 
 jobs:
   discovery_sync:
@@ -20,71 +18,94 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 动态偏移探测
-        id: detector # 给这一步加个 ID 方便后续引用输出
+      - name: 基于现有数据向后探测（支持 A 变化，并更新已有池子）
+        id: detector
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
 
-            const baseDate = new Date(process.env.BASE_DATE);
-            const today = new Date();
-            const cycleDays = parseInt(process.env.CYCLE_DAYS);
-            
-            const diffDays = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24));
-            const totalCycles = Math.floor(diffDays / cycleDays);
-            const theoryB = Math.floor(totalCycles / 2) + 1;
-            const theoryC = (totalCycles % 2) + 1;
-
             const filePath = path.join(process.env.GITHUB_WORKSPACE, 'src/data/gacha_map.json');
             let gachaMap = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf-8')) : {};
-            
-            // --- 新增：用于记录本次新抓到的 ID ---
+
+            // 1. 从现有 special_ 和 weponbox_ 中找出最大的 (A, B, C)
+            let maxA = 1, maxB = 0, maxC = 1;
+            Object.keys(gachaMap).forEach(id => {
+              if (!id.startsWith('special_') && !id.startsWith('weponbox_')) return;
+              const parts = id.split('_');
+              if (parts.length >= 4) {
+                const a = parseInt(parts[1]);
+                const b = parseInt(parts[2]);
+                const c = parseInt(parts[3]);
+                if (a > maxA) {
+                  maxA = a; maxB = b; maxC = c;
+                } else if (a === maxA) {
+                  if (b > maxB) {
+                    maxB = b; maxC = c;
+                  } else if (b === maxB && c > maxC) {
+                    maxC = c;
+                  }
+                }
+              }
+            });
+            console.log(`📌 当前最新卡池锚点: A=${maxA}, B=${maxB}, C=${maxC}`);
+
+            // 2. 构建候选探测计划（包含刷新当前池 + 后续可能的新池）
+            const candidates = [
+              { a: maxA, b: maxB, c: maxC },          // 刷新当前池（官方可能补全数据）
+              { a: maxA, b: maxB, c: maxC + 1 },      // 同版本下一池
+              { a: maxA, b: maxB, c: maxC + 2 },      // 同版本下两池
+              { a: maxA, b: maxB + 1, c: 1 },         // 下一个小版本首池
+              { a: maxA, b: maxB + 1, c: 2 },         // 下一个小版本第二池
+              { a: maxA + 1, b: 0, c: 1 }             // 下一个大版本首池
+            ];
+
+            // 去重（避免重复，比如 C 和 C+1 等）
+            const uniqueCandidates = Array.from(new Set(candidates.map(p => `${p.a}_${p.b}_${p.c}`)))
+                                           .map(s => {
+                                             const [a, b, c] = s.split('_');
+                                             return { a: parseInt(a), b: parseInt(b), c: parseInt(c) };
+                                           });
+
             let newFetchedIds = [];
 
-            async function fetchPool(type, b, c) {
-              const poolId = `${type}_1_${b}_${c}`;
-              // 如果 ID 已经存在且包含数据，我们可以选择跳过或者更新
-              // 这里为了记录“新变动”，我们对比一下
+            async function fetchPool(type, a, b, c) {
+              const poolId = `${type}_${a}_${b}_${c}`;
               const url = `https://ef-webview.hypergryph.com/api/content?lang=zh-cn&pool_id=${poolId}&server_id=1`;
               try {
                 const res = await fetch(url);
                 const json = await res.json();
                 if (json.code === 0 && json.data?.pool) {
-                  // 只有当这个 ID 之前不在 map 里，或者数据发生了变化时，才记录
-                  if (!gachaMap[poolId]) {
+                  const isNew = !gachaMap[poolId];
+                  if (isNew) {
                     newFetchedIds.push(poolId);
+                    console.log(`🎯 新发现: ${poolId}`);
+                  } else {
+                    console.log(`🔄 更新已有数据: ${poolId}`);
                   }
                   gachaMap[poolId] = json.data.pool;
-                  console.log(`🎯 [FOUND] ${poolId}`);
                   return true;
+                } else {
+                  console.log(`❌ 无效接口: ${poolId}`);
                 }
-              } catch (e) {}
+              } catch (e) {
+                console.log(`⚠️ 请求失败: ${poolId}`);
+              }
               return false;
             }
 
-            async function smartDiscover(type) {
-              const plan = [
-                { b: theoryB, c: theoryC },
-                { b: theoryB, c: theoryC + 1 },
-                { b: theoryB, c: theoryC + 2 },
-                { b: theoryB + 1, c: 1 },
-                { b: theoryB + 1, c: 2 }
-              ];
-              const uniquePlan = Array.from(new Set(plan.map(p => `${p.b}_${p.c}`)))
-                                     .map(s => ({ b: parseInt(s.split('_')[0]), c: parseInt(s.split('_')[1]) }));
-              for (const p of uniquePlan) {
-                await fetchPool(type, p.b, p.c);
-              }
+            // 3. 依次探测所有候选（刷新已有池 + 探测新池）
+            for (const cand of uniqueCandidates) {
+              console.log(`🔍 探测候选: A=${cand.a}, B=${cand.b}, C=${cand.c}`);
+              await fetchPool('special', cand.a, cand.b, cand.c);
+              await fetchPool('weponbox', cand.a, cand.b, cand.c);
             }
 
-            await smartDiscover('special');
-            await smartDiscover('weponbox');
-
+            // 4. 保存更新后的文件
             fs.writeFileSync(filePath, JSON.stringify(gachaMap, null, 2));
-            
-            // --- 输出 ID 给后续步骤 ---
+
+            // 5. 输出新抓到的 ID 给 commit 步骤
             core.setOutput('ids', newFetchedIds.join(', '));
 
       - name: 提交更新到仓库
@@ -92,20 +113,18 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add src/data/gacha_map.json
-          
-          # 获取上一步输出的 ID 列表
+
           FETCHED_IDS="${{ steps.detector.outputs.ids }}"
-          
+
           if git diff --staged --quiet; then
             echo "没有新内容需要提交"
           else
-            # 如果有新 ID，就把 ID 写进 commit message，否则用通用说明
             if [ -z "$FETCHED_IDS" ]; then
-              COMMIT_MSG="auto: 定时同步卡池数据 (无新ID)"
+              COMMIT_MSG="auto: 定时同步卡池数据 (数据更新)"
             else
               COMMIT_MSG="auto: 添加新卡池数据 [ $FETCHED_IDS ]"
             fi
-            
+
             git commit -m "$COMMIT_MSG"
             git push
           fi
