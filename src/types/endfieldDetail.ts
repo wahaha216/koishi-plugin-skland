@@ -228,6 +228,71 @@ interface Quickaccess {
   link: string;
 }
 
+interface IndieHardGroupsDungeonGroups {
+  normalDungeon: {
+    id: string;
+    name: string;
+    isPass: boolean;
+  };
+  hardDungeon: {
+    id: string;
+    name: string;
+    isPass: boolean;
+  };
+}
+
+interface IndieHardGroups {
+  id: string;
+  name: string;
+  pic: string;
+  dungeonGroups: IndieHardGroupsDungeonGroups[];
+  activityStartTs: string;
+  activityEndTs: string;
+  activityName: string;
+  isInActivity: boolean;
+}
+
+interface CrisisContract {
+  id: string;
+  highest: number;
+  challengeCount: number;
+  achieve: {
+    achievementData: {
+      id: string;
+      name: string;
+      initIcon: string;
+      reforge2Icon: string;
+      reforge3Icon: string;
+      platedIcon: string;
+      cateName: string;
+      canCertify: boolean;
+      cate: string;
+      initLevel: number;
+    };
+    level: number;
+    isPlated: number;
+    obtainTs: string;
+  };
+  weeklyMission: {
+    count: number;
+    total: number;
+  };
+  indicatorMission: {
+    count: number;
+    total: number;
+  };
+  stageMission: {
+    count: number;
+    total: number;
+  };
+  name: string;
+  kvImage: string;
+  startAtTs: string;
+  endAtTs: string;
+  gameplayEndAtTs: string;
+  headerImage: string;
+}
+
 // 接口返回数据
 export interface CardDetailData {
   detail: {
@@ -286,5 +351,11 @@ export interface CardDetailData {
     };
     currentTs: string;
     quickaccess: Quickaccess[];
+    // 影拓丰碑
+    indieHard: {
+      indieHardGroups: IndieHardGroups[];
+    };
+    seekSuspicion: { count: number; total: number };
+    crisisContract: CrisisContract[];
   };
 }
