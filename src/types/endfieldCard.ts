@@ -147,6 +147,8 @@ export interface EndfieldCardDomainCollections {
   piece: { current: number; max: number };
   // 协议采录桩
   blackbox: { current: number; max: number };
+  // 塔晶
+  trstar: { current: number; max: number };
 }
 
 export interface EndfieldCardDomain {
@@ -283,6 +285,8 @@ export interface EndfieldInfoCard {
     blackbox: number;
     // 总控中枢
     control: number;
+    // 塔晶
+    trstar: number;
   };
   // 据点
   domain: EndfieldCardDomain[];

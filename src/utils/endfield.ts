@@ -59,6 +59,11 @@ export const buildEndfieldCardJson = (
     const count = c.collections.reduce((pc, cc) => pc + cc.blackboxCount, 0);
     return p + count;
   }, 0);
+  // 塔晶
+  const collectionTrstar = data.detail.domain.reduce((p, c) => {
+    const count = c.collections.reduce((pc, cc) => pc + cc.trstarCount, 0);
+    return p + count;
+  }, 0);
   // 总控中枢等级
   const control = data.detail.spaceShip.rooms.find((r) => r.type === 0).level;
 
@@ -92,6 +97,7 @@ export const buildEndfieldCardJson = (
       },
       piece: { current: l.pieceCount.count, max: l.pieceCount.total },
       blackbox: { current: l.blackboxCount.count, max: l.blackboxCount.total },
+      trstar: { current: l.trstarCount.count, max: l.trstarCount.total },
     }));
     domain.push({
       domainId: d.domainId,
@@ -200,6 +206,7 @@ export const buildEndfieldCardJson = (
       equipTrchest: collectionEquipTrchest,
       piece: collectionPiece,
       blackbox: collectionBlackbox,
+      trstar: collectionTrstar,
       control,
     },
     domain,

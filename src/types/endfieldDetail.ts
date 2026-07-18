@@ -199,6 +199,7 @@ interface DomainCollections {
   equipTrchestCount: number;
   pieceCount: number;
   blackboxCount: number;
+  trstarCount: number;
 }
 
 interface DomainLevels {
@@ -209,6 +210,7 @@ interface DomainLevels {
   equipTrchestCount: { count: number; total: number };
   pieceCount: { count: number; total: number };
   blackboxCount: { count: number; total: number };
+  trstarCount: { count: number; total: number };
 }
 
 interface Domain {

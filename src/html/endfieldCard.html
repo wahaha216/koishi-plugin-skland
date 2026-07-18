@@ -156,7 +156,6 @@
       .level-name {
         color: var(--color-gold);
         font-weight: bold;
-        width: 100px;
       }
 
       /* --- 据点产出：修复数值与进度条 --- */
@@ -673,23 +672,25 @@
             <table class="exploration-table" align="center">
               <thead>
                 <tr>
-                  <th>区域</th>
-                  <th>醚质</th>
-                  <th>储藏箱</th>
-                  <th>装备模板箱</th>
-                  <th>维修灵感点</th>
-                  <th>协议采录桩</th>
+                  <th style="width: 80px; text-align: center">区域</th>
+                  <th style="width: 60px; text-align: center">醚质</th>
+                  <th style="width: 60px; text-align: center">储藏箱</th>
+                  <th style="width: 60px; text-align: center">装备模板箱</th>
+                  <th style="width: 60px; text-align: center">维修灵感点</th>
+                  <th style="width: 60px; text-align: center">协议采录桩</th>
+                  <th style="width: 60px; text-align: center">塔晶</th>
                 </tr>
               </thead>
               <tbody>
                 {{#each collections}}
                 <tr>
-                  <td class="level-name">{{name}}</td>
-                  <td>{{formatCount puzzle}}</td>
-                  <td>{{formatCount trchest}}</td>
-                  <td>{{formatCount equipTrchest}}</td>
-                  <td>{{formatCount piece}}</td>
-                  <td>{{formatCount blackbox}}</td>
+                  <td style="text-align: center" class="level-name">{{name}}</td>
+                  <td style="text-align: center">{{formatCount puzzle}}</td>
+                  <td style="text-align: center">{{formatCount trchest}}</td>
+                  <td style="text-align: center">{{formatCount equipTrchest}}</td>
+                  <td style="text-align: center">{{formatCount piece}}</td>
+                  <td style="text-align: center">{{formatCount blackbox}}</td>
+                  <td style="text-align: center">{{formatCount trstar}}</td>
                 </tr>
                 {{/each}}
               </tbody>
@@ -703,7 +704,11 @@
             <div class="settlement-section">
               {{#each settlements}}
               <div class="set-card">
-                <img class="set-avatar" src="{{officerAvatar}}" onerror="this.style.opacity='0'" />
+                <img
+                  class="set-avatar"
+                  src="{{officerAvatar}}"
+                  onerror="this.style.opacity = '0'"
+                />
                 <div style="flex: 1; min-width: 0">
                   <div
                     style="
@@ -824,6 +829,10 @@
               <div class="collect-item">
                 <span class="value">{{collection.blackbox}}</span>
                 <span class="label">协议采录桩</span>
+              </div>
+              <div class="collect-item">
+                <span class="value">{{collection.trstar}}</span>
+                <span class="label">塔晶</span>
               </div>
               <div class="collect-item">
                 <span class="value">{{collection.control}}</span>
