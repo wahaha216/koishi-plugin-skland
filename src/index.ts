@@ -155,9 +155,11 @@ export async function apply(ctx: Context, config: Config) {
   ctx.model.extend(
     "skland_endfield_char_gacha",
     {
+      kind: "string",
       userId: "string",
       poolId: "string",
       poolName: "string",
+      nameText: "string",
       category: "string",
       charId: "string",
       charName: "string",
@@ -174,9 +176,11 @@ export async function apply(ctx: Context, config: Config) {
   ctx.model.extend(
     "skland_endfield_weapon_gacha",
     {
+      kind: "string",
       userId: "string",
       poolId: "string",
       poolName: "string",
+      nameText: "string",
       category: "string",
       weaponId: "string",
       weaponName: "string",

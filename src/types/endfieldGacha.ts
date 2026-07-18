@@ -6,8 +6,10 @@ export type GachaCategory =
   | "";
 
 export interface EndfieldCharacterGacha {
+  kind: "draw";
   poolId: "standard" | "beginner" | string;
   poolName: "基础寻访" | "启程寻访" | string;
+  nameText: string;
   charId: string;
   charName: string;
   rarity: 4 | 5 | 6;
@@ -18,8 +20,10 @@ export interface EndfieldCharacterGacha {
 }
 
 export interface EndfieldWeaponGacha {
+  kind: "draw";
   poolId: string;
   poolName: string;
+  nameText: string;
   weaponId: string;
   weaponName: string;
   weaponType: string;
