@@ -136,6 +136,14 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.2.1</summary>
+
+1. 添加塔晶收集品展示
+2. 兼容最新的抽卡数据
+
+</details>
+
+<details>
 <summary>0.2.0</summary>
 
 1. 未出6星时显示“当前卡池未出6星”
