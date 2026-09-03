@@ -6209,6 +6209,10 @@
     "gift_content": [
       {
         "type": 3,
+        "name": "典范"
+      },
+      {
+        "type": 3,
         "name": "破碎君王"
       },
       {
