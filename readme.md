@@ -34,7 +34,7 @@
     <td>解绑账号</td>
   </tr>
   <tr>
-    <td rowspan="2">autoSign</td>
+    <td rowspan="2">skland autoSign</td>
     <td> -e </td>
     <td> enabled 启用自动签到 </td>
     <td rowspan="2"> 不加参数为切换自动签到状态 </td>
