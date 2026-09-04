@@ -81,7 +81,8 @@ export function processEndfieldPool(
       const avatarUrl = isChar
         ? chars.find((c) => c.charData.name === item.charName)?.charData
             .avatarSqUrl
-        : `https://lulush.microgg.cn/BeyondUID/resource/itemiconbig/${item.weaponId}.png`;
+        : // : `https://lulush.microgg.cn/BeyondUID/resource/itemiconbig/${item.weaponId}.png`;
+          `https://end.canmoe.com/images/weapon/${item.weaponId}.avif`;
       if (item.category !== "" && item.isFree) {
         if (hasGoldInFree) {
           // 兼容多金：如果是 6 星就推送，不是就静默
