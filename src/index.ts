@@ -113,9 +113,11 @@ export async function apply(ctx: Context, config: Config) {
       pool_id: "string",
       pool_gacha_type: "string",
       pool_name: "string",
+      version_num: "string",
       pool_type: "string",
       up6_name: "string",
       up6_image: "string",
+      up6_avatar: "string",
       up5_name: "string",
       up5_image: "string",
       up6_item_name: "string",
@@ -139,8 +141,11 @@ export async function apply(ctx: Context, config: Config) {
       pool_id: "string",
       pool_gacha_type: "string",
       pool_name: "string",
+      version_num: "string",
+      pool_type: "string",
       up6_name: "string",
       up6_image: "string",
+      up6_banner: "string",
       all: "list",
       link_char_pool_name: "string",
       gift_weapon_name: "string",
@@ -159,6 +164,7 @@ export async function apply(ctx: Context, config: Config) {
       userId: "string",
       poolId: "string",
       poolName: "string",
+      poolVersion: "string",
       nameText: "string",
       category: "string",
       charId: "string",
@@ -180,6 +186,8 @@ export async function apply(ctx: Context, config: Config) {
       userId: "string",
       poolId: "string",
       poolName: "string",
+      poolVersion: "string",
+      poolType: "string",
       nameText: "string",
       category: "string",
       weaponId: "string",
@@ -318,7 +326,7 @@ export async function apply(ctx: Context, config: Config) {
            * @returns
            */
           const upsertGacha = async <
-            T extends { seqId: string; poolId: string },
+            T extends { seqId: string; poolId: string; poolVersion?: string },
           >(
             table:
               | "skland_endfield_char_gacha"
@@ -340,7 +348,12 @@ export async function apply(ctx: Context, config: Config) {
                 category = ENDFIELD_POOL_TYPE.JOINT;
               }
 
-              return { ...gacha, category, userId };
+              return {
+                ...gacha,
+                category,
+                userId,
+                poolVersion: gacha.poolVersion ?? "",
+              } as T;
             });
 
             return await ctx.database.upsert(table, processed, [

@@ -9,6 +9,7 @@ export interface EndfieldCharacterGacha {
   kind: "draw";
   poolId: "standard" | "beginner" | string;
   poolName: "基础寻访" | "启程寻访" | string;
+  poolVersion?: string;
   nameText: string;
   charId: string;
   charName: string;
@@ -23,6 +24,8 @@ export interface EndfieldWeaponGacha {
   kind: "draw";
   poolId: string;
   poolName: string;
+  poolVersion?: string;
+  poolType: "normal";
   nameText: string;
   weaponId: string;
   weaponName: string;
@@ -41,9 +44,11 @@ export interface GachaData {
 export interface EndfieldCharPool {
   pool_gacha_type: "char";
   pool_name: string;
+  version_num: "0";
   pool_type: "special" | "standard" | "beginner";
   up6_name: string;
   up6_image: string;
+  up6_avatar: string;
   up5_name: string;
   up5_image: string;
   up6_item_name: string;
@@ -61,9 +66,12 @@ export interface EndfieldCharPool {
 export interface EndfieldWeaponPool {
   pool_gacha_type: "weapon";
   pool_name: string;
+  version_num: "0";
+  pool_type: "normal";
   link_char_pool_name: string;
   up6_name: string;
   up6_image: string;
+  up6_banner: string;
   gift_weapon_name: string;
   gift_weapon_box_name: string;
   gift_weapon_reward_name: string;
