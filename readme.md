@@ -136,6 +136,13 @@ TODO
 ## 更新记录
 
 <details>
+<summary>0.2.2</summary>
+
+同步添加1.5版本抽卡记录与卡池记录的新增字段（兼容最新的抽卡数据）
+
+</details>
+
+<details>
 <summary>0.2.1</summary>
 
 1. 添加塔晶收集品展示
